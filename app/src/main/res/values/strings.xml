@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">NextRep</string>
+    <string name="exercises_list_page">Listes des exercices</string>
+    <string name="sessions_list_page">Listes des séances</string>
+    <string name="main_session_page">Séance actuelle</string>
+    <string name="exercise_creation_page">Création d’exercice</string>
+    <string name="session_creation_page">Création de séance</string>
+    <string name="stats_page">Statistiques</string>
+    <string name="congratulations_page">Félicitation</string>
+    <string name="settings_page">Paramètres</string>
+
+
 </resources>
