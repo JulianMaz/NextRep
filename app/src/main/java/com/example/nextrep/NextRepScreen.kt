@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.nextrep.ui.ExercisesListPage
+import com.example.nextrep.ui.HomePage
 import com.example.nextrep.ui.OrderViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,16 +37,22 @@ fun NextRepApp(
         topBar = {
         }
     ) { innerPadding ->
-        //val uiState by viewModel.uiState.collectAsState()
         NavHost(
             navController = navController,
             startDestination = NextRepScreen.HomePage.name,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = NextRepScreen.HomePage.name) {
-                ExercisesListPage(
-                    onExercisesButtonClicked = {
+                HomePage(
+                    onExercisesListButtonClicked = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
+                    }
+                )
+            }
+            composable(route = NextRepScreen.ExercisesListPage.name) {
+                ExercisesListPage(
+                    onHomePageButtonClicked = {
+                        navController.navigate(NextRepScreen.HomePage.name)
                     }
                 )
             }
