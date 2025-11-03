@@ -13,6 +13,7 @@ import com.example.nextrep.ui.OrderViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.nextrep.ui.screens.ExerciseCreationPage
 
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -51,6 +52,16 @@ fun NextRepApp(
                 ExercisesListPage(
                     onHomePageButtonClicked = {
                         navController.navigate(NextRepScreen.HomePage.name)
+                    },
+                    onCreationExerciseButtonClicked = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    }
+                )
+            }
+            composable(route = NextRepScreen.ExerciseCreationPage.name) {
+                ExerciseCreationPage(
+                    onExerciseCreated = {
+                        navController.navigate(NextRepScreen.ExercisesListPage.name)
                     }
                 )
             }

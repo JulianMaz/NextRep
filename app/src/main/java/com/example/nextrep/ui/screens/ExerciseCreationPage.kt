@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.nextrep.models.Exercise
+import com.example.nextrep.ui.components.LabeledTextField
 
 @Composable
 fun ExerciseCreationPage(

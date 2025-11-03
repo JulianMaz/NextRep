@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun ExercisesListPage(
     onHomePageButtonClicked: () -> Unit,
+    onCreationExerciseButtonClicked : () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -22,6 +23,9 @@ fun ExercisesListPage(
         Text(text = "Exercises List Page")
         Button(onClick = { onHomePageButtonClicked() }) {
             Text("Go to Home Page")
+        }
+        Button(onClick = { onCreationExerciseButtonClicked() }) {
+            Text("Create an exercise")
         }
     }
 }
