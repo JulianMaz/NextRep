@@ -1,8 +1,9 @@
 package com.example.nextrep
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
 
-enum class CupcakeScreen(@StringRes val title: Int) {
+enum class NextRepScreen(@StringRes val title: Int) {
     Start(title = R.string.app_name),
     ExercisesListPage(title = R.string.exercises_list_page),
     SessionsListPage(title = R.string.sessions_list_page),
@@ -13,3 +14,8 @@ enum class CupcakeScreen(@StringRes val title: Int) {
     CongratulationsPage(title = R.string.congratulations_page),
     SettingsPage(title = R.string.settings_page)
 }
+@Composable
+fun NextRepApp(
+    //viewModel: OrderViewModel = viewModel(),
+    //navController: NavHostController = rememberNavController()
+) {}
