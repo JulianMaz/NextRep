@@ -1,4 +1,4 @@
-package com.example.nextrep.ui
+package com.example.nextrep.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
