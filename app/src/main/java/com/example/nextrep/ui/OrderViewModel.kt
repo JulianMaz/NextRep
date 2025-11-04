@@ -31,5 +31,4 @@ import java.util.Locale
  */
 class OrderViewModel : ViewModel() {
 
-
 }
