@@ -11,6 +11,7 @@ data class Exercise(
 )
 
 data class Session(
+    val id: Int,
     val name: String,
     val exercises: List<Exercise>,
     val date: String

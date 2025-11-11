@@ -9,7 +9,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.nextrep.ui.screens.ExercisesListPage
 import com.example.nextrep.ui.screens.HomePage
-import com.example.nextrep.ui.OrderViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -30,7 +29,6 @@ enum class NextRepScreen(@StringRes val title: Int) {
 }
 @Composable
 fun NextRepApp(
-    viewModel: OrderViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     Scaffold(
