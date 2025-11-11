@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.nextrep.ui.screens.ExerciseCreationPage
 import com.example.nextrep.ui.screens.MainSessionPage
+import com.example.nextrep.ui.screens.SessionsListPage
 
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -73,6 +74,28 @@ fun NextRepApp(
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     }
                 )
+            }
+            composable(route = NextRepScreen.SessionsListPage.name) {
+                SessionsListPage(
+                    onSessionClick = { sessionId ->
+                        navController.navigate("${NextRepScreen.MainSessionPage.name}/$sessionId")
+                    },
+                    onAddSession = {
+                        navController.navigate(NextRepScreen.SessionCreationPage.name)
+                    }
+                )
+            }
+            composable(route = NextRepScreen.SessionCreationPage){
+
+            }
+            composable(route = NextRepScreen.CongratulationsPage){
+
+            }
+            composable(route = NextRepScreen.SettingsPage){
+
+            }
+            composable(route = NextRepScreen.StatsPage){
+
             }
         }
     }
