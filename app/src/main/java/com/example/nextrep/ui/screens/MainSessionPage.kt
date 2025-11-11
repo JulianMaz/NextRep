@@ -10,9 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun HomePage(
-    onExercisesListButtonClicked: () -> Unit,
-    onSessionCreated: () -> Unit,
+fun MainSessionPage(
+    onExerciseAdded: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -21,12 +20,9 @@ fun HomePage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Home Page")
-        Button(onClick = { onExercisesListButtonClicked() }) {
-            Text("Go to Exercises List")
-        }
-        Button(onClick = { onSessionCreated() }) {
-            Text("Start training")
+        Text(text = "Current Session")
+        Button(onClick = { onExerciseAdded() }) {
+            Text("Add an exercise")
         }
     }
 }
