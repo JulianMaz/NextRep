@@ -3,6 +3,7 @@ package com.example.nextrep.models
 // ce fichier est responsable la data structure de l'app
 
 data class Exercise(
+    val id: Int,
     val name: String,
     val description: String,
     val series: Int,

@@ -55,6 +55,7 @@ fun ExerciseCreationPage(
         Button(
             onClick = {
                 val exercise = Exercise(
+                    id = 0,
                     name = name,
                     description = description,
                     series = series.toIntOrNull() ?: 0,

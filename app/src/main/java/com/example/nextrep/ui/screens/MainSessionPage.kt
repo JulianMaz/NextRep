@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun MainSessionPage(
     onExerciseAdded: () -> Unit,
+    onFinishWorkout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -23,6 +24,9 @@ fun MainSessionPage(
         Text(text = "Current Session")
         Button(onClick = { onExerciseAdded() }) {
             Text("Add an exercise")
+        }
+        Button(onClick = { onFinishWorkout() }) {
+            Text("Workout Finished")
         }
     }
 }
