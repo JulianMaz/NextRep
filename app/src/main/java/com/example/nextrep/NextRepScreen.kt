@@ -29,6 +29,7 @@ import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
 import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.example.nextrep.ui.components.NextRepTopBar
 
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -46,7 +47,7 @@ enum class NextRepScreen(@StringRes val title: Int) {
 fun NextRepApp(
     navController: NavHostController = rememberNavController()
 ) {
-    // 1. Define the list of routes that should display the bottom navigation bar.
+    // Define the list of routes that should display the bottom navigation bar.
     val bottomBarRoutes = setOf(
         NextRepScreen.HomePage.name,
         NextRepScreen.ExercisesListPage.name,
@@ -54,16 +55,28 @@ fun NextRepApp(
         NextRepScreen.StatsPage.name
     )
 
-    // 2. Get the current back stack entry from the NavController.
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    // 3. Get the current route from the back stack entry.
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // 4. Determine if the bottom bar should be shown.
     val showBottomBar = currentRoute in bottomBarRoutes
+    val showTopBar = currentRoute != NextRepScreen.CongratulationsPage.name // Exemple pour l'instant
+
 
     Scaffold(
+        topBar = {
+            if (showTopBar) {
+                NextRepTopBar(
+                    onSettingsClick = {
+                        navController.navigate(NextRepScreen.SettingsPage.name)
+                    },
+                    onHomeClick = {
+                        navController.navigate(NextRepScreen.HomePage.name) {
+                            // Nettoyer la pile de retour pour éviter d'empiler les pages
+                            popUpTo(NextRepScreen.HomePage.name) { inclusive = true }
+                        }
+                    }
+                )
+            }
+        },
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
@@ -73,15 +86,10 @@ fun NextRepApp(
                             selected = isSelected,
                             onClick = {
                                 navController.navigate(item.route) {
-                                    // Pop up to the start destination of the graph to
-                                    // avoid building up a large stack of destinations
-                                    // on the back stack as users select items
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
-                                    // Avoid multiple copies of the same destination when re-selecting the same item
                                     launchSingleTop = true
-                                    // Restore state when re-selecting a previously selected item
                                     restoreState = true
                                 }
                             },
@@ -100,10 +108,7 @@ fun NextRepApp(
         ) {
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
-                    onExercisesListButtonClicked = {
-                        navController.navigate(NextRepScreen.ExercisesListPage.name)
-                    },
-                    onSessionCreated = {
+                    newSessionCreated = {
                         navController.navigate(NextRepScreen.MainSessionPage.name)
                     }
                 )
