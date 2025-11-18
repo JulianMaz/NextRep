@@ -26,12 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.models.Session
-import com.example.nextrep.ui.viewmodels.SessionsViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.nextrep.viewmodels.SessionsViewModel
 
 // --- ViewModel and State (Often in their own files) ---
 
@@ -55,7 +52,7 @@ data class SessionsUiState(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionsListPage(
-    sessionsViewModel: SessionsViewModel = viewModel(),
+    sessionsViewModel: SessionsViewModel= viewModel() ,
     onSessionClick: (Int) -> Unit,
     onAddSession: () -> Unit
 ) {

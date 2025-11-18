@@ -1,4 +1,5 @@
-package com.example.nextrep.ui.viewmodels
+package com.example.nextrep.viewmodels
+
 
 import androidx.lifecycle.ViewModel
 import com.example.nextrep.models.Exercise
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 data class ExercisesUiState(
     val exercises: List<Exercise> = emptyList(),
     val isLoading: Boolean = false
+
     // You could add other properties here like error messages
 )
 
@@ -31,6 +33,19 @@ class ExercisesViewModel : ViewModel() {
         loadExercises()
     }
 
+    private var nextId = 1
+    fun addExercise(exercise: Exercise) {
+        val newExercise = exercise.copy(id = nextId++)
+        val updatedList = _uiState.value.exercises + newExercise
+
+        _uiState.value = _uiState.value.copy(
+            exercises = updatedList
+        )
+    }
+
+    fun getExerciseById(id: Int): Exercise? {
+        return _uiState.value.exercises.find { it.id == id }
+    }
     /**
      * Loads the list of exercises.
      * In a real application, this would fetch data from a repository

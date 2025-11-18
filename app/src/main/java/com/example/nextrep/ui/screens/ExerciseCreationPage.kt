@@ -9,65 +9,97 @@ import androidx.compose.ui.unit.dp
 import com.example.nextrep.models.Exercise
 import com.example.nextrep.ui.components.LabeledTextField
 
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.nextrep.viewmodels.ExercisesViewModel
+
 @Composable
 fun ExerciseCreationPage(
-    onExerciseCreated: (Exercise) -> Unit
+    exercisesViewModel: ExercisesViewModel = viewModel()
 ) {
+    // UI State local pour la création
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var series by remember { mutableStateOf("") }
     var repetitions by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        LabeledTextField(
-            label = "Nom",
-            value = name,
-            onValueChange = { name = it }
+    ExerciseCreationContent(
+        name = name,
+        description = description,
+        series = series,
+        repetitions = repetitions,
+        photoUri = photoUri,
+        onNameChange = { name = it },
+        onDescriptionChange = { description = it },
+        onSeriesChange = { series = it },
+        onRepetitionsChange = { repetitions = it },
+        onPhotoUriChange = { photoUri = it },
+        onSave = {
+            val exercise = Exercise(
+                id = 0,
+                name = name,
+                description = description,
+                series = series.toIntOrNull() ?: 0,
+                repetitions = repetitions.toIntOrNull() ?: 0,
+                photoUri = photoUri.ifEmpty { null }
+            )
 
-        )
+            exercisesViewModel.addExercise(exercise)
+        }
+    )
+}
 
-        LabeledTextField(
-            label = "Description",
-            value = description,
-            onValueChange = { description = it }
-        )
+@Composable
+fun ExerciseCreationContent(
+    name: String,
+    description: String,
+    series: String,
+    repetitions: String,
+    photoUri: String,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onSeriesChange: (String) -> Unit,
+    onRepetitionsChange: (String) -> Unit,
+    onPhotoUriChange: (String) -> Unit,
+    onSave: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
 
-        LabeledTextField(
-            label = "Séries",
-            value = series,
-            onValueChange = { series = it }
-        )
+        LabeledTextField(label = "Exercise name", value = name, onValueChange = onNameChange)
+        LabeledTextField(label = "Description", value = description, onValueChange = onDescriptionChange)
+        LabeledTextField(label = "Series", value = series, onValueChange = onSeriesChange)
+        LabeledTextField(label = "Repetitions", value = repetitions, onValueChange = onRepetitionsChange)
+        LabeledTextField(label = "Photo URI", value = photoUri, onValueChange = onPhotoUriChange)
 
-        LabeledTextField(
-            label = "Répétitions",
-            value = repetitions,
-            onValueChange = { repetitions = it }
-        )
-
-        LabeledTextField(
-            label = "Photo (URI)",
-            value = photoUri,
-            onValueChange = { photoUri = it }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-// push
         Button(
-            onClick = {
-                val exercise = Exercise(
-                    id = 0,
-                    name = name,
-                    description = description,
-                    series = series.toIntOrNull() ?: 0,
-                    repetitions = repetitions.toIntOrNull() ?: 0,
-                    photoUri = photoUri.ifEmpty { null }
-                )
-                onExerciseCreated(exercise)
-            },
+            onClick = onSave,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Créer l'exercice")
+            Text("Create Exercise")
         }
     }
 }
-// push
+
+@Preview(showBackground = true)
+@Composable
+fun ExerciseCreationPagePreview() {
+    ExerciseCreationContent(
+        name = "",
+        description = "",
+        series = "",
+        repetitions = "",
+        photoUri = "",
+        onNameChange = {},
+        onDescriptionChange = {},
+        onSeriesChange = {},
+        onRepetitionsChange = {},
+        onPhotoUriChange = {},
+        onSave = {}
+    )
+}

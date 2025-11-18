@@ -118,11 +118,7 @@ fun NextRepApp(
                 )
             }
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
-                ExerciseCreationPage(
-                    onExerciseCreated = {
-                        navController.navigate(NextRepScreen.ExercisesListPage.name)
-                    }
-                )
+
             }
             composable(route = NextRepScreen.MainSessionPage.name) {
                 MainSessionPage(
