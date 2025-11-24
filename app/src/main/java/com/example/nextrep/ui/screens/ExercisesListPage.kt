@@ -11,7 +11,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,9 +25,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.Session
 import com.example.nextrep.ui.viewmodels.ExercisesViewModel
-import com.example.nextrep.ui.viewmodels.ExercisesUiState
 
+
+data class ExercisesUiState(
+    val exercises: List<Exercise> = emptyList()
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesListPage(
     // These are the correct parameters that match the NavHost calls
@@ -38,18 +47,35 @@ fun ExercisesListPage(
 
     // The Scaffold is in NextRepScreen.kt, so we only need the content here.
     // We pass onAddExercise down to the content, perhaps for a button.
-    ExerciseListContent(
-        exercises = uiState.exercises,
-        onExerciseClick = onExerciseClick
-    )
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = { Text("Workout Exercises") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+    ) { innerPadding ->
+        ExerciseListContent(
+            exercises = uiState.exercises,
+            onExerciseClick = onExerciseClick,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseListContent(
+    exercisesViewModel: ExercisesViewModel = viewModel(),
     exercises: List<Exercise>,
     onExerciseClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val uiState by exercisesViewModel.uiState.collectAsState()
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
