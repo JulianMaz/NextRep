@@ -10,97 +10,67 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.models.Exercise
-import com.example.nextrep.models.Session
 import com.example.nextrep.viewmodels.ExercisesViewModel
-
-
-data class ExercisesUiState(
-    val exercises: List<Exercise> = emptyList()
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesListPage(
-    // These are the correct parameters that match the NavHost calls
-    exercisesViewModel: ExercisesViewModel = viewModel(),
+    exercisesViewModel: ExercisesViewModel,     // 🔹 ViewModel partagé injecté depuis NextRepApp
     onAddExercise: () -> Unit,
     onExerciseClick: (Int) -> Unit
 ) {
-    // The UI observes the state from the ViewModel.
-    // Any changes to the state will automatically trigger a recomposition.
-    val uiState by exercisesViewModel.uiState.collectAsState()
+    val uiState by exercisesViewModel.uiState.collectAsState()   // 🔹 observe la liste des exercices
 
-    // The Scaffold is in NextRepScreen.kt, so we only need the content here.
-    // We pass onAddExercise down to the content, perhaps for a button.
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                title = { Text("Workout Exercises") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
+    Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAddExercise) {
-                Icon(Icons.Default.Add, contentDescription = "Add Session")
+                Icon(Icons.Default.Add, contentDescription = "Add Exercise")
             }
         }
     ) { innerPadding ->
         ExerciseListContent(
-            exercises = uiState.exercises,
+            exercises = uiState.exercises,                  // 🔹 liste mise à jour automatiquement
             onExerciseClick = onExerciseClick,
             modifier = Modifier.padding(innerPadding)
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseListContent(
     exercises: List<Exercise>,
     onExerciseClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
         if (exercises.isEmpty()) {
             item {
                 Text(
-                    text = "No exercises found. You can add them from the session screen or create new ones.",
+                    text = "No exercises found.",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp)
                 )
             }
         } else {
-            // The key helps Compose efficiently update the list
             items(exercises, key = { it.id }) { exercise ->
-                ExerciseItem(exercise = exercise, onClick = { onExerciseClick(exercise.id) })
+                ExerciseItem(
+                    exercise = exercise,
+                    onClick = { onExerciseClick(exercise.id) }   // 🔹 navigation vers un détail plus tard
+                )
             }
         }
     }
@@ -121,34 +91,5 @@ fun ExerciseItem(
         ) {
             Text(text = exercise.name, style = MaterialTheme.typography.titleMedium)
         }
-    }
-}
-
-// --- Previews ---
-
-@Preview(showBackground = true, name = "Exercises List With Items")
-@Composable
-fun ExerciseListContentPreview() {
-    val previewExercises = listOf(
-        Exercise(id = 1, name = "Bench Press", description = "Description for Bench Press", series = 3, repetitions = 12),
-        Exercise(id = 2, name = "Squat", description = "Description for Squat", series = 3, repetitions = 12),
-        Exercise(id = 3, name = "Bicep Curl", description = "Description for Biceps Curl", series = 3, repetitions = 12)
-    )
-    MaterialTheme {
-        ExerciseListContent(
-            exercises = previewExercises,
-            onExerciseClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Exercises List Empty")
-@Composable
-fun ExerciseListContentEmptyPreview() {
-    MaterialTheme {
-        ExerciseListContent(
-            exercises = emptyList(),
-            onExerciseClick = {}
-        )
     }
 }

@@ -30,6 +30,7 @@ import com.example.nextrep.ui.screens.SettingsPage
 import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.example.nextrep.ui.components.NextRepTopBar
+import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -49,7 +50,9 @@ fun NextRepApp(
 ) {
 
     val sessionsViewModel: SessionsViewModel = viewModel()
+    val exercisesViewModel: ExercisesViewModel = viewModel()
     // Define the list of routes that should display the bottom navigation bar.
+
     val bottomBarRoutes = setOf(
         NextRepScreen.HomePage.name,
         NextRepScreen.ExercisesListPage.name,
@@ -117,15 +120,18 @@ fun NextRepApp(
             }
             composable(route = NextRepScreen.ExercisesListPage.name) {
                 ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,       // 🔹 même instance
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = { exerciseId ->
+                    onExerciseClick = { id ->
+                        // 🔹 plus tard: page de détail
                     }
                 )
             }
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
                 ExerciseCreationPage(
+                    exercisesViewModel = exercisesViewModel,       // 🔹 même instance
                     onExerciseCreated = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     }
