@@ -30,7 +30,7 @@ import com.example.nextrep.ui.screens.SettingsPage
 import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.example.nextrep.ui.components.NextRepTopBar
-
+import com.example.nextrep.viewmodels.SessionsViewModel
 
 enum class NextRepScreen(@StringRes val title: Int) {
     HomePage(title = R.string.app_name),
@@ -47,6 +47,8 @@ enum class NextRepScreen(@StringRes val title: Int) {
 fun NextRepApp(
     navController: NavHostController = rememberNavController()
 ) {
+
+    val sessionsViewModel: SessionsViewModel = viewModel()
     // Define the list of routes that should display the bottom navigation bar.
     val bottomBarRoutes = setOf(
         NextRepScreen.HomePage.name,
