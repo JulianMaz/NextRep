@@ -146,6 +146,7 @@ fun NextRepApp(
             }
             composable(route = NextRepScreen.SessionsListPage.name) {
                 SessionsListPage(
+                    sessionsViewModel = sessionsViewModel,
                     onSessionClick = { sessionId ->
                         navController.navigate(NextRepScreen.MainSessionPage.name)
                     },
@@ -156,12 +157,13 @@ fun NextRepApp(
             }
             composable(route = NextRepScreen.SessionCreationPage.name) {
                 SessionCreationPage(
+                    sessionsViewModel = sessionsViewModel,
                     onSessionCreated = {
-                        // Navigate back to the sessions list after creation
-                        navController.navigate(NextRepScreen.SessionsListPage.name) {
-                            // Optional: Clear the back stack to avoid going back to the creation page
-                            popUpTo(NextRepScreen.SessionsListPage.name) { inclusive = true }
-                        }
+                        // On revient simplement à la liste
+                        navController.popBackStack(
+                            NextRepScreen.SessionsListPage.name,
+                            inclusive = false
+                        )
                     }
                 )
             }

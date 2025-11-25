@@ -1,4 +1,4 @@
-package com.example.nextrep.ui.viewmodels
+package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.example.nextrep.models.Exercise

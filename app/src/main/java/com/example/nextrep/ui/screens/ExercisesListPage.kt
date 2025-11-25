@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.models.Exercise
 import com.example.nextrep.models.Session
-import com.example.nextrep.ui.viewmodels.ExercisesViewModel
+import com.example.nextrep.viewmodels.ExercisesViewModel
 
 
 data class ExercisesUiState(
