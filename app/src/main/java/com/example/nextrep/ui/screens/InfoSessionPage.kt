@@ -2,6 +2,7 @@ package com.example.nextrep.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,10 +19,11 @@ import com.example.nextrep.models.Exercise
 import com.example.nextrep.viewmodels.SessionsViewModel
 
 @Composable
-fun MainSessionPage(
+fun InfoSessionPage(
     sessionId: Int,                           // 🔹 l'ID de la session à afficher
     sessionsViewModel: SessionsViewModel,     // 🔹 ViewModel partagé des sessions
     onExerciseAdded: () -> Unit,
+    onStartWorkout: (Int) -> Unit,
     onFinishWorkout: () -> Unit
 ) {
     val uiState by sessionsViewModel.uiState.collectAsState()      // 🔹 on observe les sessions
@@ -94,6 +96,14 @@ fun MainSessionPage(
                 .fillMaxSize(fraction = 0.1f)
         ) {
             Text("Add exercise")
+        }
+        Button(
+            onClick = { onStartWorkout(sessionId) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Text("Commencer l’entraînement")
         }
 
         Button(

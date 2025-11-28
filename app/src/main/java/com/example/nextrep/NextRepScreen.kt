@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.nextrep.ui.bottomNavItems
 import com.example.nextrep.ui.screens.CongratulationsPage
 import com.example.nextrep.ui.screens.ExerciseCreationPage
-import com.example.nextrep.ui.screens.MainSessionPage
+import com.example.nextrep.ui.screens.InfoSessionPage
 import com.example.nextrep.ui.screens.SessionCreationPage
 import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
@@ -33,6 +33,7 @@ import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.example.nextrep.models.Session
 import com.example.nextrep.ui.components.NextRepTopBar
+import com.example.nextrep.ui.screens.WorkoutLivePage
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
 
@@ -40,7 +41,8 @@ enum class NextRepScreen(@StringRes val title: Int) {
     HomePage(title = R.string.app_name),
     ExercisesListPage(title = R.string.exercises_list_page),
     SessionsListPage(title = R.string.sessions_list_page),
-    MainSessionPage(title = R.string.main_session_page),
+
+    InfoSessionPage(title = R.string.main_session_page) ,  // tu pourras renommer la string plus tard
     ExerciseCreationPage(title = R.string.exercise_creation_page),
     SessionCreationPage(title = R.string.session_creation_page),
     StatsPage(title = R.string.stats_page),
@@ -141,18 +143,21 @@ fun NextRepApp(
                 )
             }
             composable(
-                route = "${NextRepScreen.MainSessionPage.name}/{sessionId}",    // 🔹 route avec argument
+                route = "${NextRepScreen.InfoSessionPage.name}/{sessionId}",    // 🔹 route avec argument
                 arguments = listOf(
                     navArgument("sessionId") { type = NavType.IntType }         // 🔹 définition de l'argument
                 )
             ) { backStackEntry ->
                 val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable  // 🔹 on récupère l'ID
 
-                MainSessionPage(
+                InfoSessionPage(
                     sessionId = sessionId,                                      // 🔹 on passe l'ID à l'écran
                     sessionsViewModel = sessionsViewModel,                      // 🔹 on passe le ViewModel des sessions
                     onExerciseAdded = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
+                    },
+                    onStartWorkout = { id ->
+                        navController.navigate("WorkoutLive/$id")     // 🔹 lancement direct
                     },
                     onFinishWorkout = {
                         navController.navigate(NextRepScreen.CongratulationsPage.name) {
@@ -165,7 +170,7 @@ fun NextRepApp(
                 SessionsListPage(
                     sessionsViewModel = sessionsViewModel,
                     onSessionClick = { sessionId ->
-                        navController.navigate("${NextRepScreen.MainSessionPage.name}/$sessionId")
+                        navController.navigate("${NextRepScreen.InfoSessionPage.name}/$sessionId")
                     },
                     onAddSession = {
                         navController.navigate(NextRepScreen.SessionCreationPage.name)
@@ -240,6 +245,27 @@ fun NextRepApp(
                     onValidateSelection = { selectedExercises ->
                         sessionsViewModel.setPendingExercisesForNewSession(selectedExercises)  // 🔹 stocke dans le VM
                         navController.popBackStack()                                             // 🔹 retour à SessionCreationPage
+                    }
+                )
+            }
+            composable(
+                route = "WorkoutLive/{sessionId}",
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable
+
+                WorkoutLivePage(
+                    sessionId = sessionId,
+                    sessionsViewModel = sessionsViewModel,
+                    onFinishWorkout = {
+                        navController.navigate(NextRepScreen.CongratulationsPage.name) {
+                            popUpTo(NextRepScreen.HomePage.name) { inclusive = false }
+                        }
+                    },
+                    onAddExercisesClick = {
+                        navController.navigate("chooseExercisesForWorkout/$sessionId")
                     }
                 )
             }
