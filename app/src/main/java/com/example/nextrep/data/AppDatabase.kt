@@ -7,14 +7,24 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.nextrep.data.exercise.ExerciseDao
 import com.example.nextrep.data.models.Exercise
+import com.example.nextrep.data.models.Session
+import com.example.nextrep.data.session.SessionDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Exercise::class], version = 1)
+@Database(
+    entities = [
+        Exercise::class,
+        Session::class
+    ],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun exerciseDao(): ExerciseDao
+    abstract fun sessionDao(): SessionDao
 
     companion object {
 
@@ -29,6 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "nextrep-db"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(object : RoomDatabase.Callback() {
 
                         override fun onCreate(db: SupportSQLiteDatabase) {

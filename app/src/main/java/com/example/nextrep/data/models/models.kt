@@ -23,7 +23,7 @@ data class Session(
     val name: String,
     val date: String
 )
-/*
+
 @Entity(
     tableName = "session_exercise_crossref",
     primaryKeys = ["sessionId", "exerciseId"]
@@ -41,4 +41,4 @@ data class SessionWithExercises(
         associateBy = Junction(SessionExerciseCrossRef::class)
     )
     val exercises: List<Exercise>
-)*/
+)

@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.nextrep.models.Session
+import com.example.nextrep.data.models.Session
 import com.example.nextrep.viewmodels.SessionsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,8 +137,8 @@ fun SessionItem(session: Session, onClick: () -> Unit) {
 fun SessionsListContentPreview() {
     // 1. Create some fake data for the preview
     val previewSessions = listOf(
-        Session(id = 1, name = "Morning Workout", date = "2025-11-10", exercises = emptyList()),
-        Session(id = 2, name = "Leg Day", date = "2025-11-12", exercises = emptyList())
+        Session(id = 1, name = "Morning Workout", date = "2025-11-10"),
+        Session(id = 2, name = "Leg Day", date = "2025-11-12")
     )
 
     // 2. Wrap your content composable in your app's theme to see correct styling

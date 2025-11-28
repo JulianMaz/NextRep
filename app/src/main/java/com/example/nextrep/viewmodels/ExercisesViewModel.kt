@@ -1,10 +1,14 @@
 package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.example.nextrep.models.Exercise
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.viewModelScope
+import com.example.nextrep.data.exercise.ExerciseDao
+import com.example.nextrep.data.models.Exercise
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class ExercisesUiState(
     val exercises: List<Exercise> = emptyList(),
@@ -12,29 +16,26 @@ data class ExercisesUiState(
     val errorMessage: String? = null
 )
 
-class ExercisesViewModel : ViewModel() {
+class ExercisesViewModel(private val exerciseDao: ExerciseDao) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ExercisesUiState())
-    val uiState: StateFlow<ExercisesUiState> = _uiState.asStateFlow()
-
-    private var nextId = 1   // 🔹 ID auto-incrémenté pour les exercices créés
+    val uiState: StateFlow<ExercisesUiState> =
+        exerciseDao.getAllExercises().map { exercises ->
+            ExercisesUiState(exercises = exercises, isLoading = false)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = ExercisesUiState(isLoading = true)
+        )
 
     fun addExercise(exercise: Exercise) {
-        val newExercise = exercise.copy(id = nextId++)   // 🔹 Ici on assigne un ID unique
-        val updated = _uiState.value.exercises + newExercise
-
-        _uiState.value = _uiState.value.copy(
-            exercises = updated,                         // 🔹 Mise à jour de la liste
-            errorMessage = null
-        )
+        viewModelScope.launch {
+            exerciseDao.insertExercise(exercise)
+        }
     }
 
-    fun deleteExercise(exerciseId: Int) {
-        val updated = _uiState.value.exercises.filterNot { it.id == exerciseId }
-        _uiState.value = _uiState.value.copy(exercises = updated)
-    }
-
-    fun getExerciseById(id: Int): Exercise? {
-        return _uiState.value.exercises.firstOrNull { it.id == id }
+    fun deleteExercise(id: Int) {
+        viewModelScope.launch {
+            exerciseDao.deleteExercise(id)
+        }
     }
 }

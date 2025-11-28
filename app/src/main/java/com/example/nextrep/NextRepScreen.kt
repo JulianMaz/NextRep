@@ -1,5 +1,7 @@
 package com.example.nextrep
 
+import ExercisesViewModelFactory
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.forEach
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -29,9 +32,11 @@ import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
 import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.example.nextrep.data.AppDatabase
 import com.example.nextrep.ui.components.NextRepTopBar
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
+import com.example.nextrep.viewmodels.SessionsViewModelFactory
 
 enum class NextRepScreen(@StringRes val title: Int) {
     HomePage(title = R.string.app_name),
@@ -49,8 +54,15 @@ fun NextRepApp(
     navController: NavHostController = rememberNavController()
 ) {
 
-    val sessionsViewModel: SessionsViewModel = viewModel()
-    val exercisesViewModel: ExercisesViewModel = viewModel()
+    val context = LocalContext.current
+    val database = AppDatabase.buildDatabase(context.applicationContext as Application)
+
+    val exercisesViewModel: ExercisesViewModel = viewModel(
+        factory = ExercisesViewModelFactory(database.exerciseDao())
+    )
+    val sessionsViewModel: SessionsViewModel = viewModel(
+        factory = SessionsViewModelFactory(database.sessionDao())
+    )
     // Define the list of routes that should display the bottom navigation bar.
 
     val bottomBarRoutes = setOf(

@@ -13,8 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Exercise
-import com.example.nextrep.models.Session
+import com.example.nextrep.data.models.Exercise
+import com.example.nextrep.data.models.Session
 import com.example.nextrep.viewmodels.SessionsViewModel
 
 @Composable
@@ -78,10 +78,8 @@ fun SessionCreationPage(
                     }
 
                 val newSession = Session(
-                    id = 0, // sera remplacé par SessionsViewModel
                     name = name,
-                    date = date,
-                    exercises = exercisesList
+                    date = date
                 )
 
                 sessionsViewModel.addSession(newSession)

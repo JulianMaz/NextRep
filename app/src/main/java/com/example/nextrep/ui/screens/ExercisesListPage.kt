@@ -15,17 +15,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Exercise
+import com.example.nextrep.data.models.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesListPage(
-    exercisesViewModel: ExercisesViewModel,     // 🔹 ViewModel partagé injecté depuis NextRepApp
+    exercisesViewModel: ExercisesViewModel,
     onAddExercise: () -> Unit,
     onExerciseClick: (Int) -> Unit
 ) {
-    val uiState by exercisesViewModel.uiState.collectAsState()   // 🔹 observe la liste des exercices
+    val uiState by exercisesViewModel.uiState.collectAsState()
+    val exercises = uiState.exercises
 
     Scaffold(
         floatingActionButton = {
