@@ -21,6 +21,7 @@ fun MainSessionPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
         Text(text = "Current Session")
         Button(onClick = { onExerciseAdded() }) {
             Text("Add an exercise")
