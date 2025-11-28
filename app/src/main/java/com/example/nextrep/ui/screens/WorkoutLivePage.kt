@@ -398,14 +398,16 @@ private fun ExerciseLiveBlock(
             // ----- Table des sets -----
             // Header
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("SET", style = MaterialTheme.typography.labelSmall)
-                Text("PREVIOUS", style = MaterialTheme.typography.labelSmall)
-                Text("KG", style = MaterialTheme.typography.labelSmall)
-                Text("REPS", style = MaterialTheme.typography.labelSmall)
-                Text("Done", style = MaterialTheme.typography.labelSmall)
+                Text("SET", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
+                Text("PREVIOUS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
+                Text("KG", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
+                Text("REPS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
+                Text("Done", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
             }
 
             Divider(modifier = Modifier.padding(vertical = 4.dp))
@@ -458,12 +460,11 @@ private fun SetRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(setRow.index.toString())
+        Text(setRow.index.toString(), Modifier.weight(0.8f))
 
-        Text(setRow.previousKg)
+        Text(setRow.previousKg, Modifier.weight(1f))
 
         OutlinedTextField(
             value = weight,
@@ -471,7 +472,9 @@ private fun SetRow(
                 weight = it
                 onValueChange(setRow.copy(weightKg = it, reps = reps, isCompleted = isCompleted))
             },
-            modifier = Modifier.width(64.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp),
             singleLine = true
         )
 
@@ -481,7 +484,9 @@ private fun SetRow(
                 reps = it
                 onValueChange(setRow.copy(weightKg = weight, reps = it, isCompleted = isCompleted))
             },
-            modifier = Modifier.width(64.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp),
             singleLine = true
         )
 
@@ -490,14 +495,11 @@ private fun SetRow(
             onCheckedChange = { checked ->
                 isCompleted = checked
                 onCompletedToggle(
-                    setRow.copy(
-                        weightKg = weight,
-                        reps = reps,
-                        isCompleted = checked
-                    ),
+                    setRow.copy(weightKg = weight, reps = reps, isCompleted = checked),
                     checked
                 )
-            }
+            },
+            modifier = Modifier.weight(0.8f)
         )
     }
 }
