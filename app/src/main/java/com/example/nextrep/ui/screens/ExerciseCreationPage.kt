@@ -61,7 +61,7 @@ fun ExerciseCreationPage(
                 val reps = repetitionsText.toIntOrNull() ?: 0
 
                 val newExercise = Exercise(
-                    id = 0,                                 // 🔹 remplacé automatiquement dans le ViewModel
+                    id = 0,
                     name = name,
                     description = description,
                     series = series,

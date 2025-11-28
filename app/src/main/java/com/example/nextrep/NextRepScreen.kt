@@ -1,7 +1,10 @@
 package com.example.nextrep
 
+import androidx.compose.runtime.collectAsState           // 🔹 pour Flow/StateFlow.collectAsState()
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.annotation.StringRes
-import androidx.compose.foundation.gestures.forEach
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -9,7 +12,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,6 +31,7 @@ import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
 import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.example.nextrep.models.Session
 import com.example.nextrep.ui.components.NextRepTopBar
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
@@ -114,7 +117,7 @@ fun NextRepApp(
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
                     newSessionCreated = {
-                        navController.navigate(NextRepScreen.MainSessionPage.name)
+                        navController.navigate(NextRepScreen.SessionCreationPage.name)   // 🔹 On va créer une session
                     }
                 )
             }
@@ -137,14 +140,22 @@ fun NextRepApp(
                     }
                 )
             }
-            composable(route = NextRepScreen.MainSessionPage.name) {
+            composable(
+                route = "${NextRepScreen.MainSessionPage.name}/{sessionId}",    // 🔹 route avec argument
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.IntType }         // 🔹 définition de l'argument
+                )
+            ) { backStackEntry ->
+                val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable  // 🔹 on récupère l'ID
+
                 MainSessionPage(
+                    sessionId = sessionId,                                      // 🔹 on passe l'ID à l'écran
+                    sessionsViewModel = sessionsViewModel,                      // 🔹 on passe le ViewModel des sessions
                     onExerciseAdded = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     },
                     onFinishWorkout = {
                         navController.navigate(NextRepScreen.CongratulationsPage.name) {
-                            // Clear the back stack up to home so you don't go back into the workout
                             popUpTo(NextRepScreen.HomePage.name) { inclusive = false }
                         }
                     }
@@ -154,7 +165,7 @@ fun NextRepApp(
                 SessionsListPage(
                     sessionsViewModel = sessionsViewModel,
                     onSessionClick = { sessionId ->
-                        navController.navigate(NextRepScreen.MainSessionPage.name)
+                        navController.navigate("${NextRepScreen.MainSessionPage.name}/$sessionId")
                     },
                     onAddSession = {
                         navController.navigate(NextRepScreen.SessionCreationPage.name)
@@ -162,14 +173,17 @@ fun NextRepApp(
                 )
             }
             composable(route = NextRepScreen.SessionCreationPage.name) {
+                val sessionsUiState by sessionsViewModel.uiState.collectAsState()   // 🔹 observe l'état des sessions
+
                 SessionCreationPage(
                     sessionsViewModel = sessionsViewModel,
+                    uiState = sessionsUiState,
+                    onChooseExercises = {
+                        navController.navigate("chooseExercises")                   // 🔹 ouvre la sélection d'exos
+                    },
                     onSessionCreated = {
-                        // On revient simplement à la liste
-                        navController.popBackStack(
-                            NextRepScreen.SessionsListPage.name,
-                            inclusive = false
-                        )
+                        // 🔹 On revient simplement à l'écran précédent (souvent SessionsListPage)
+                        navController.popBackStack()
                     }
                 )
             }
@@ -189,6 +203,48 @@ fun NextRepApp(
             composable(route = NextRepScreen.StatsPage.name) {
                 StatsPage()
             }
+            composable(route = "ExercisesForNewSession") {                       // 🔹 écran de sélection des exos pour créer une session
+                ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,
+                    onAddExercise = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    },
+                    onExerciseClick = { /* en mode sélection on ignore le clic simple */ },
+                    selectionMode = true,                                        // 🔹 active le mode sélection
+                    onValidateSelection = { selectedExercises ->
+                        // 🔹 ici on crée une nouvelle session avec les exos sélectionnés
+                        val newSession = Session(
+                            id = 0,
+                            name = "Nouvelle session",                           // 🔹 tu pourras ajouter un TextField pour le nom plus tard
+                            date = "Date à définir",
+                            exercises = selectedExercises
+                        )
+                        sessionsViewModel.addSession(newSession)
+
+                        // 🔹 on revient à la liste des sessions
+                        navController.popBackStack(
+                            NextRepScreen.SessionsListPage.name,
+                            inclusive = false
+                        )
+                    }
+                )
+            }
+            composable(route = "chooseExercises") {
+                ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,
+                    onAddExercise = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    },
+                    onExerciseClick = { /* pas utilisé en mode sélection */ },
+                    selectionMode = true,                                            // 🔹 active le mode sélection
+                    onValidateSelection = { selectedExercises ->
+                        sessionsViewModel.setPendingExercisesForNewSession(selectedExercises)  // 🔹 stocke dans le VM
+                        navController.popBackStack()                                             // 🔹 retour à SessionCreationPage
+                    }
+                )
+            }
+
+
         }
     }
 }

@@ -1,23 +1,19 @@
 package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.example.nextrep.models.Exercise          // 🔹 Exercise pour la sélection
 import com.example.nextrep.models.Session
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Represents the UI state for sessions.
- */
 data class SessionsUiState(
     val sessions: List<Session> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val pendingExercisesForNewSession: List<Exercise> = emptyList()   // 🔹 exos choisis pour la prochaine session
 )
 
-/**
- * ViewModel for managing sessions.
- */
 class SessionsViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(SessionsUiState())
@@ -25,30 +21,28 @@ class SessionsViewModel : ViewModel() {
 
     private var nextId = 1
 
-    /**
-     * Adds a new session to the state.
-     */
     fun addSession(session: Session) {
         val newSession = session.copy(id = nextId++)
-        val updatedSessions = _uiState.value.sessions + newSession
+        val updated = _uiState.value.sessions + newSession
 
         _uiState.value = _uiState.value.copy(
-            sessions = updatedSessions,
-            errorMessage = null
+            sessions = updated,
+            errorMessage = null,
+            pendingExercisesForNewSession = emptyList()     // 🔹 on nettoie la sélection
         )
     }
 
-    /**
-     * Deletes a session by ID.
-     */
+    fun setPendingExercisesForNewSession(exercises: List<Exercise>) { // 🔹 appelée depuis chooseExercises
+        _uiState.value = _uiState.value.copy(
+            pendingExercisesForNewSession = exercises
+        )
+    }
+
     fun deleteSession(sessionId: Int) {
         val updated = _uiState.value.sessions.filterNot { it.id == sessionId }
         _uiState.value = _uiState.value.copy(sessions = updated)
     }
 
-    /**
-     * Optional helper if you want to get a session detail later.
-     */
     fun getSessionById(sessionId: Int): Session? {
         return _uiState.value.sessions.firstOrNull { it.id == sessionId }
     }
