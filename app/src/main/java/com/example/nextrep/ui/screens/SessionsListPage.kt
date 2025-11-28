@@ -26,12 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.data.models.Session
+import com.example.nextrep.data.models.SessionWithExercises
 import com.example.nextrep.viewmodels.SessionsViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 // --- ViewModel and State (Often in their own files) ---
 
@@ -89,7 +86,7 @@ fun SessionsListPage(
 
 @Composable
 fun SessionListContent(
-    sessions: List<Session>,
+    sessions: List<SessionWithExercises>,
     onSessionClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -108,8 +105,8 @@ fun SessionListContent(
                 )
             }
         } else {
-            items(sessions, key = { it.id }) { session ->
-                SessionItem(session = session, onClick = { onSessionClick(session.id) })
+            items(sessions, key = { it.session.id }) { sessionWithExercises ->
+                SessionItem(sessionWithExercises = sessionWithExercises, onClick = { onSessionClick(sessionWithExercises.session.id) })
             }
         }
     }
@@ -118,7 +115,7 @@ fun SessionListContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionItem(session: Session, onClick: () -> Unit) {
+fun SessionItem(sessionWithExercises: SessionWithExercises, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
@@ -126,18 +123,26 @@ fun SessionItem(session: Session, onClick: () -> Unit) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = session.name, style = MaterialTheme.typography.titleMedium)
-            Text(text = "Date: ${session.date}", style = MaterialTheme.typography.bodySmall)
+            Text(text = sessionWithExercises.session.name, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Date: ${sessionWithExercises.session.date}", style = MaterialTheme.typography.bodySmall)
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                sessionWithExercises.exercises.forEach { exercise ->
+                    Text(
+                        text = "• ${exercise.name}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun SessionsListContentPreview() {
     // 1. Create some fake data for the preview
     val previewSessions = listOf(
-        Session(id = 1, name = "Morning Workout", date = "2025-11-10"),
+        sessionWithExerciseSession(id = 1, name = "Morning Workout", date = "2025-11-10"),
         Session(id = 2, name = "Leg Day", date = "2025-11-12")
     )
 
@@ -149,7 +154,7 @@ fun SessionsListContentPreview() {
             modifier = Modifier.padding(PaddingValues(0.dp))
         )
     }
-}
+}*/
 
 @Preview(showBackground = true, name = "Sessions List Empty")
 @Composable

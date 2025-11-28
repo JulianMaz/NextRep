@@ -82,7 +82,10 @@ fun SessionCreationPage(
                     date = date
                 )
 
-                sessionsViewModel.addSession(newSession)
+                sessionsViewModel.addSessionWithExercises(
+                    session = newSession,
+                    exercises = exercisesList
+                )
                 onSessionCreated()
             },
             modifier = Modifier.padding(top = 24.dp)

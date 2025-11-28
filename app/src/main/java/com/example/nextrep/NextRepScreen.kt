@@ -3,7 +3,6 @@ package com.example.nextrep
 import ExercisesViewModelFactory
 import android.app.Application
 import androidx.annotation.StringRes
-import androidx.compose.foundation.gestures.forEach
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -61,7 +60,7 @@ fun NextRepApp(
         factory = ExercisesViewModelFactory(database.exerciseDao())
     )
     val sessionsViewModel: SessionsViewModel = viewModel(
-        factory = SessionsViewModelFactory(database.sessionDao())
+        factory = SessionsViewModelFactory(database.sessionDao(), database.exerciseDao())
     )
     // Define the list of routes that should display the bottom navigation bar.
 

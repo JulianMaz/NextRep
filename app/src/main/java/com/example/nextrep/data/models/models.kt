@@ -37,8 +37,13 @@ data class SessionWithExercises(
     @Embedded val session: Session,
     @Relation(
         parentColumn = "id",
+        entity = Exercise::class,
         entityColumn = "id",
-        associateBy = Junction(SessionExerciseCrossRef::class)
+        associateBy = Junction(
+            value = SessionExerciseCrossRef::class,
+            parentColumn = "sessionId",
+            entityColumn = "exerciseId"
+        )
     )
     val exercises: List<Exercise>
 )

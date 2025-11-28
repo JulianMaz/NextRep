@@ -12,13 +12,15 @@ import com.example.nextrep.data.session.SessionDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.nextrep.data.models.SessionExerciseCrossRef
 
 @Database(
     entities = [
         Exercise::class,
-        Session::class
+        Session::class,
+        SessionExerciseCrossRef::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

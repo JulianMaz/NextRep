@@ -28,7 +28,6 @@ fun ExercisesListPage(
     onExerciseClick: (Int) -> Unit
 ) {
     val uiState by exercisesViewModel.uiState.collectAsState()
-    val exercises = uiState.exercises
 
     Scaffold(
         floatingActionButton = {
@@ -38,7 +37,7 @@ fun ExercisesListPage(
         }
     ) { innerPadding ->
         ExerciseListContent(
-            exercises = uiState.exercises,                  // 🔹 liste mise à jour automatiquement
+            exercises = uiState.exercises,
             onExerciseClick = onExerciseClick,
             modifier = Modifier.padding(innerPadding)
         )
