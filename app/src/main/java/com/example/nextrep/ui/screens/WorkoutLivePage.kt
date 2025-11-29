@@ -1,6 +1,5 @@
 package com.example.nextrep.ui.screens
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.Session
+import com.example.nextrep.models.WorkoutSetEntity
 import com.example.nextrep.viewmodels.SessionsViewModel
 import kotlinx.coroutines.delay
 
@@ -45,14 +46,15 @@ data class SetRowState(
  *
  * @param sessionId           ID de la session que l'on est en train de faire
  * @param sessionsViewModel   ViewModel des sessions (pour récupérer la session et ses exercices)
- * @param onFinishWorkout     Callback appelé quand l'utilisateur termine la séance
+ * @param onFinishWorkout     Callback appelé quand l'utilisateur termine la séance,
+ *                            avec la liste des WorkoutSetEntity complétés.
  * @param onAddExercisesClick Callback pour ouvrir ExercisesListPage en mode sélection
  */
 @Composable
 fun WorkoutLivePage(
     sessionId: Int,
     sessionsViewModel: SessionsViewModel,
-    onFinishWorkout: () -> Unit,                     // 🔹 navigation vers CongratulationsPage
+    onFinishWorkout: (List<WorkoutSetEntity>) -> Unit,
     onAddExercisesClick: () -> Unit,                 // 🔹 ouvre la sélection d'exercices
     modifier: Modifier = Modifier
 ) {
@@ -67,6 +69,9 @@ fun WorkoutLivePage(
 
     // 🔹 Nombre total de sets complétés (toutes les ✓)
     var totalCompletedSets by remember { mutableIntStateOf(0) }
+
+    // 🔹 Map des sets par exercice : exerciseId -> List<SetRowState>
+    var exerciseSets by remember { mutableStateOf<Map<Int, List<SetRowState>>>(emptyMap()) }
 
     // 🔹 Démarrage automatique du timer à l'ouverture
     LaunchedEffect(Unit) {
@@ -101,7 +106,14 @@ fun WorkoutLivePage(
         // ===== HEADER LIVE =====
         HeaderLiveSection(
             elapsedSeconds = elapsedSeconds,
-            onFinishWorkout = onFinishWorkout
+            onFinishWorkout = {
+                // 🔹 Construction de la liste des WorkoutSetEntity complétés
+                val completedSets = buildCompletedWorkoutSets(
+                    session = session,
+                    exerciseSets = exerciseSets
+                )
+                onFinishWorkout(completedSets)
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -131,6 +143,12 @@ fun WorkoutLivePage(
                 items(session.exercises, key = { it.id }) { exercise ->
                     ExerciseLiveBlock(
                         exercise = exercise,
+                        onSetsChanged = { setsForExercise ->
+                            // 🔹 On met à jour la map globale des sets par exercice
+                            exerciseSets = exerciseSets.toMutableMap().apply {
+                                put(exercise.id, setsForExercise)
+                            }
+                        },
                         onSetCompletedChanged = { completed ->
                             // 🔹 ICI : on tient à jour le compteur global de sets terminés
                             if (completed) {
@@ -332,7 +350,8 @@ private fun NoExercisesSection(
 @Composable
 private fun ExerciseLiveBlock(
     exercise: Exercise,
-    onSetCompletedChanged: (Boolean) -> Unit   // 🔹 informe la page qu'un set est (dé)coché
+    onSetsChanged: (List<SetRowState>) -> Unit,      // 🔹 informe la page de TOUTES les lignes
+    onSetCompletedChanged: (Boolean) -> Unit         // 🔹 informe la page qu'un set est (dé)coché
 ) {
     // 🔹 Liste des sets pour cet exercice (3 par défaut)
     var sets by remember {
@@ -377,6 +396,8 @@ private fun ExerciseLiveBlock(
                     )
                 }
 
+
+
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column {
@@ -419,10 +440,12 @@ private fun ExerciseLiveBlock(
                     onValueChange = { updated ->
                         // 🔹 ICI : on met à jour la liste des sets pour cet exercice
                         sets = sets.map { if (it.index == updated.index) updated else it }
+                        onSetsChanged(sets)
                     },
                     onCompletedToggle = { updated, newlyCompleted ->
                         // 🔹 Met à jour la ligne
                         sets = sets.map { if (it.index == updated.index) updated else it }
+                        onSetsChanged(sets)
                         // 🔹 Informe la page que le nombre de sets complétés a changé
                         onSetCompletedChanged(newlyCompleted)
                     }
@@ -437,6 +460,7 @@ private fun ExerciseLiveBlock(
                     val nextIndex = (sets.maxOfOrNull { it.index } ?: 0) + 1
                     // 🔹 Ajoute un nouveau set vide
                     sets = sets + SetRowState(index = nextIndex)
+                    onSetsChanged(sets)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -505,6 +529,52 @@ private fun SetRow(
 }
 
 /**
+ * Construit la liste des WorkoutSetEntity à partir :
+ *  - de la session (id / nom / date / exercices)
+ *  - de la map exerciseId -> List<SetRowState>
+ *
+ * On ne garde que :
+ *  - les sets cochés (isCompleted == true)
+ *  - avec un weightKg et reps parsables.
+ */
+private fun buildCompletedWorkoutSets(
+    session: Session,
+    exerciseSets: Map<Int, List<SetRowState>>
+): List<WorkoutSetEntity> {
+    val result = mutableListOf<WorkoutSetEntity>()
+    val now = System.currentTimeMillis()
+
+    session.exercises.forEach { exercise ->
+        val setsForExercise = exerciseSets[exercise.id] ?: emptyList()
+
+        setsForExercise.forEach { row ->
+            if (!row.isCompleted) return@forEach
+            if (row.weightKg.isBlank() || row.reps.isBlank()) return@forEach
+
+            val weight = row.weightKg.toFloatOrNull() ?: return@forEach
+            val reps = row.reps.toIntOrNull() ?: return@forEach
+
+            result.add(
+                WorkoutSetEntity(
+                    id = 0L,
+                    sessionId = session.id,
+                    sessionName = session.name,
+                    sessionDate = session.date,
+                    exerciseId = exercise.id,
+                    exerciseName = exercise.name,
+                    setIndex = row.index,
+                    weightKg = weight,
+                    reps = reps,
+                    timestamp = now
+                )
+            )
+        }
+    }
+
+    return result
+}
+
+/**
  * Format HH:MM:SS à partir d'un nombre de secondes.
  */
 private fun formatDuration(totalSeconds: Int): String {
@@ -513,4 +583,3 @@ private fun formatDuration(totalSeconds: Int): String {
     val seconds = totalSeconds % 60
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
-

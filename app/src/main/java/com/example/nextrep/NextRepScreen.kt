@@ -1,5 +1,9 @@
 package com.example.nextrep
 
+
+import androidx.room.Room
+import androidx.compose.ui.platform.LocalContext
+import com.example.nextrep.data.NextRepDatabase
 import androidx.compose.runtime.collectAsState           // 🔹 pour Flow/StateFlow.collectAsState()
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
@@ -12,6 +16,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -36,6 +42,9 @@ import com.example.nextrep.ui.components.NextRepTopBar
 import com.example.nextrep.ui.screens.WorkoutLivePage
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
+import com.example.nextrep.models.WorkoutHistoryRepository
+import com.example.nextrep.ui.screens.ExerciseHistoryPage
+import kotlinx.coroutines.launch
 
 enum class NextRepScreen(@StringRes val title: Int) {
     HomePage(title = R.string.app_name),
@@ -64,6 +73,27 @@ fun NextRepApp(
         NextRepScreen.SessionsListPage.name,
         NextRepScreen.StatsPage.name
     )
+
+    //======= DB REPO =======
+    val context = LocalContext.current.applicationContext
+
+    // 🔹 Initialisation DATABASE
+    val db = remember {
+        Room.databaseBuilder(
+            context,
+            NextRepDatabase::class.java,
+            "nextrep-db"
+        ).build()
+    }
+
+    // 🔹 DAO
+    val workoutSetDao = db.workoutSetDao()
+
+    // 🔹 Repository
+    val workoutHistoryRepository = remember {
+        WorkoutHistoryRepository(workoutSetDao)
+    }
+
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -129,9 +159,9 @@ fun NextRepApp(
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = { id ->
-                        // 🔹 plus tard: page de détail
-                    }
+                    onExerciseClick = {
+                        exerciseId ->
+                        navController.navigate("ExerciseHistory/$exerciseId")                    }
                 )
             }
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
@@ -256,10 +286,15 @@ fun NextRepApp(
             ) { backStackEntry ->
                 val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable
 
+                val scope = rememberCoroutineScope()
+
                 WorkoutLivePage(
                     sessionId = sessionId,
                     sessionsViewModel = sessionsViewModel,
-                    onFinishWorkout = {
+                    onFinishWorkout = { completedSets ->
+                        scope.launch {
+                            workoutHistoryRepository.saveWorkoutSets(completedSets)
+                        }
                         navController.navigate(NextRepScreen.CongratulationsPage.name) {
                             popUpTo(NextRepScreen.HomePage.name) { inclusive = false }
                         }
@@ -269,6 +304,25 @@ fun NextRepApp(
                     }
                 )
             }
+
+            composable(
+                route = "ExerciseHistory/{exerciseId}",
+                arguments = listOf(
+                    navArgument("exerciseId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: return@composable
+
+                ExerciseHistoryPage(
+                    exerciseId = exerciseId,
+                    exercisesViewModel = exercisesViewModel,
+                    workoutHistoryRepository = workoutHistoryRepository   // 🔹 maintenant ça marche
+                )
+            }
+
+
+
+
 
 
         }
