@@ -366,6 +366,7 @@ fun NextRepApp(
             composable(route = NextRepScreen.AllExercisesHistoryPage.name) {
                 AllExercisesHistoryPage(
                     exercisesViewModel = exercisesViewModel,
+                    workoutHistoryRepository = workoutHistoryRepository,
                     onExerciseClick = { exerciseId ->
                         navController.navigate("ExerciseHistory/$exerciseId")
                     }
