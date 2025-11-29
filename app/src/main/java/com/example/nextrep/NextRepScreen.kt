@@ -42,6 +42,8 @@ import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
 import com.example.nextrep.models.WorkoutHistoryRepository
 import com.example.nextrep.ui.screens.ExerciseHistoryPage
+import com.example.nextrep.ui.screens.AllExercisesHistoryPage
+import com.example.nextrep.ui.screens.ExerciseInfoPage
 import kotlinx.coroutines.launch
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -53,8 +55,8 @@ enum class NextRepScreen(@StringRes val title: Int) {
     ExerciseCreationPage(title = R.string.exercise_creation_page),
     SessionCreationPage(title = R.string.session_creation_page),
 
-    // 🔹 Nouvel écran pour l'onglet "Historique exos" (on réutilise le titre des exos)
-    ExercisesHistoryPage(title = R.string.exercises_list_page),
+    // 🔹 Nouvel écran pour l'onglet "Historique exos" (vraie page distincte)
+    AllExercisesHistoryPage(title = R.string.exercises_list_page),
 
     CongratulationsPage(title = R.string.congratulations_page),
     SettingsPage(title = R.string.settings_page)
@@ -72,7 +74,7 @@ fun NextRepApp(
         NextRepScreen.HomePage.name,
         NextRepScreen.ExercisesListPage.name,
         NextRepScreen.SessionsListPage.name,
-        NextRepScreen.ExercisesHistoryPage.name        // 🔹 remplace l’ancien Stats
+        NextRepScreen.AllExercisesHistoryPage.name        // 🔹 onglet History
     )
 
     //======= DB REPO =======
@@ -162,8 +164,10 @@ fun NextRepApp(
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    // 🔹 Ici tu peux plus tard ouvrir une page "détail exo" si tu veux
-                    onExerciseClick = { /* rien pour l’instant ou futur détail exo */ }
+                    // 🔹 Clic sur un exo -> page d'info de l'exercice
+                    onExerciseClick = { exerciseId ->
+                        navController.navigate("ExerciseInfo/$exerciseId")
+                    }
                 )
             }
 
@@ -173,6 +177,25 @@ fun NextRepApp(
                     exercisesViewModel = exercisesViewModel,
                     onExerciseCreated = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
+                    }
+                )
+            }
+
+            // ===== INFO EXERCICE =====
+            composable(
+                route = "ExerciseInfo/{exerciseId}",
+                arguments = listOf(
+                    navArgument("exerciseId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val exerciseId =
+                    backStackEntry.arguments?.getInt("exerciseId") ?: return@composable
+
+                ExerciseInfoPage(
+                    exerciseId = exerciseId,
+                    exercisesViewModel = exercisesViewModel,
+                    onViewHistory = { id ->
+                        navController.navigate("ExerciseHistory/$id")
                     }
                 )
             }
@@ -339,14 +362,10 @@ fun NextRepApp(
                 )
             }
 
-            // ===== NOUVEL ONGLET : LISTE DES EXOS POUR HISTORIQUE =====
-            composable(route = NextRepScreen.ExercisesHistoryPage.name) {
-                ExercisesListPage(
+            // ===== NOUVEL ONGLET : ALL EXERCISES HISTORY =====
+            composable(route = NextRepScreen.AllExercisesHistoryPage.name) {
+                AllExercisesHistoryPage(
                     exercisesViewModel = exercisesViewModel,
-                    onAddExercise = {
-                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
-                    },
-                    // 🔹 Ici : clic sur un exo -> historique de cet exo
                     onExerciseClick = { exerciseId ->
                         navController.navigate("ExerciseHistory/$exerciseId")
                     }

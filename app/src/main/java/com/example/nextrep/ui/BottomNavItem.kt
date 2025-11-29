@@ -22,17 +22,17 @@ val bottomNavItems = listOf(
         icon = Icons.Filled.Home
     ),
     BottomNavItem(
-        route = NextRepScreen.ExercisesListPage.name,
-        label = "Exercises",
-        icon = Icons.Filled.FitnessCenter
-    ),
-    BottomNavItem(
         route = NextRepScreen.SessionsListPage.name,
         label = "Sessions",
         icon = Icons.Filled.List
     ),
     BottomNavItem(
-        route = NextRepScreen.ExercisesHistoryPage.name,
+        route = NextRepScreen.ExercisesListPage.name,
+        label = "Exercises",
+        icon = Icons.Filled.FitnessCenter
+    ),
+    BottomNavItem(
+        route = NextRepScreen.AllExercisesHistoryPage.name,
         label = "History",
         icon = Icons.Filled.History
     )
