@@ -1,72 +1,80 @@
 package com.example.nextrep.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Exercise
-import com.example.nextrep.ui.components.LabeledTextField
+import com.example.nextrep.data.models.Exercise
+import com.example.nextrep.viewmodels.ExercisesViewModel
 
 @Composable
 fun ExerciseCreationPage(
-    onExerciseCreated: (Exercise) -> Unit
+    exercisesViewModel: ExercisesViewModel,   // 🔹 On reçoit le ViewModel partagé depuis NextRepApp
+    onExerciseCreated: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var series by remember { mutableStateOf("") }
-    var repetitions by remember { mutableStateOf("") }
-    var photoUri by remember { mutableStateOf("") }
+    var seriesText by remember { mutableStateOf("") }
+    var repetitionsText by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        LabeledTextField(
-            label = "Nom",
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+
+        OutlinedTextField(
             value = name,
-            onValueChange = { name = it }
-
+            onValueChange = { name = it },
+            label = { Text("Exercise name") }
         )
 
-        LabeledTextField(
-            label = "Description",
+        OutlinedTextField(
             value = description,
-            onValueChange = { description = it }
+            onValueChange = { description = it },
+            label = { Text("Description") },
+            modifier = Modifier.padding(top = 16.dp)
         )
 
-        LabeledTextField(
-            label = "Séries",
-            value = series,
-            onValueChange = { series = it }
+        OutlinedTextField(
+            value = seriesText,
+            onValueChange = { seriesText = it },
+            label = { Text("Number of series") },
+            modifier = Modifier.padding(top = 16.dp)
         )
 
-        LabeledTextField(
-            label = "Répétitions",
-            value = repetitions,
-            onValueChange = { repetitions = it }
+        OutlinedTextField(
+            value = repetitionsText,
+            onValueChange = { repetitionsText = it },
+            label = { Text("Repetitions per series") },
+            modifier = Modifier.padding(top = 16.dp)
         )
 
-        LabeledTextField(
-            label = "Photo (URI)",
-            value = photoUri,
-            onValueChange = { photoUri = it }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-// push
         Button(
             onClick = {
-                val exercise = Exercise(
-                    id = 0,
+                val series = seriesText.toIntOrNull() ?: 0
+                val reps = repetitionsText.toIntOrNull() ?: 0
+
+                val newExercise = Exercise(
+                    id = 0,                                 // 🔹 remplacé automatiquement dans le ViewModel
                     name = name,
                     description = description,
-                    series = series.toIntOrNull() ?: 0,
-                    repetitions = repetitions.toIntOrNull() ?: 0,
-                    photoUri = photoUri.ifEmpty { null }
+                    series = series,
+                    repetitions = reps,
+                    photoUri = null
                 )
-                onExerciseCreated(exercise)
+
+                exercisesViewModel.addExercise(newExercise) // 🔹 Ajout via le ViewModel partagé
+                onExerciseCreated()                         // 🔹 Retour vers la liste
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(top = 24.dp)
         ) {
-            Text("Créer l'exercice")
+            Text("Save Exercise")
         }
     }
 }
