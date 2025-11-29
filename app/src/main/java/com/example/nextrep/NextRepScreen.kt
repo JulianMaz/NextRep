@@ -1,6 +1,5 @@
 package com.example.nextrep
 
-
 import androidx.room.Room
 import androidx.compose.ui.platform.LocalContext
 import com.example.nextrep.data.NextRepDatabase
@@ -35,7 +34,6 @@ import com.example.nextrep.ui.screens.InfoSessionPage
 import com.example.nextrep.ui.screens.SessionCreationPage
 import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
-import com.example.nextrep.ui.screens.StatsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.example.nextrep.models.Session
 import com.example.nextrep.ui.components.NextRepTopBar
@@ -51,27 +49,30 @@ enum class NextRepScreen(@StringRes val title: Int) {
     ExercisesListPage(title = R.string.exercises_list_page),
     SessionsListPage(title = R.string.sessions_list_page),
 
-    InfoSessionPage(title = R.string.main_session_page) ,  // tu pourras renommer la string plus tard
+    InfoSessionPage(title = R.string.main_session_page),  // tu pourras renommer la string plus tard
     ExerciseCreationPage(title = R.string.exercise_creation_page),
     SessionCreationPage(title = R.string.session_creation_page),
-    StatsPage(title = R.string.stats_page),
+
+    // 🔹 Nouvel écran pour l'onglet "Historique exos" (on réutilise le titre des exos)
+    ExercisesHistoryPage(title = R.string.exercises_list_page),
+
     CongratulationsPage(title = R.string.congratulations_page),
     SettingsPage(title = R.string.settings_page)
 }
+
 @Composable
 fun NextRepApp(
     navController: NavHostController = rememberNavController()
 ) {
-
     val sessionsViewModel: SessionsViewModel = viewModel()
     val exercisesViewModel: ExercisesViewModel = viewModel()
-    // Define the list of routes that should display the bottom navigation bar.
 
+    // Routes qui affichent la bottom bar
     val bottomBarRoutes = setOf(
         NextRepScreen.HomePage.name,
         NextRepScreen.ExercisesListPage.name,
         NextRepScreen.SessionsListPage.name,
-        NextRepScreen.StatsPage.name
+        NextRepScreen.ExercisesHistoryPage.name        // 🔹 remplace l’ancien Stats
     )
 
     //======= DB REPO =======
@@ -94,12 +95,10 @@ fun NextRepApp(
         WorkoutHistoryRepository(workoutSetDao)
     }
 
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showBottomBar = currentRoute in bottomBarRoutes
     val showTopBar = currentRoute != NextRepScreen.CongratulationsPage.name // Exemple pour l'instant
-
 
     Scaffold(
         topBar = {
@@ -121,7 +120,8 @@ fun NextRepApp(
             if (showBottomBar) {
                 NavigationBar {
                     bottomNavItems.forEach { item ->
-                        val isSelected = navBackStackEntry?.destination?.hierarchy?.any { it.route == item.route } == true
+                        val isSelected =
+                            navBackStackEntry?.destination?.hierarchy?.any { it.route == item.route } == true
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
@@ -146,6 +146,7 @@ fun NextRepApp(
             startDestination = NextRepScreen.HomePage.name,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // ===== HOME =====
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
                     newSessionCreated = {
@@ -153,36 +154,42 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== EXERCISES (onglet classique) =====
             composable(route = NextRepScreen.ExercisesListPage.name) {
                 ExercisesListPage(
-                    exercisesViewModel = exercisesViewModel,       // 🔹 même instance
+                    exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = {
-                        exerciseId ->
-                        navController.navigate("ExerciseHistory/$exerciseId")                    }
+                    // 🔹 Ici tu peux plus tard ouvrir une page "détail exo" si tu veux
+                    onExerciseClick = { /* rien pour l’instant ou futur détail exo */ }
                 )
             }
+
+            // ===== CREATION EXO =====
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
                 ExerciseCreationPage(
-                    exercisesViewModel = exercisesViewModel,       // 🔹 même instance
+                    exercisesViewModel = exercisesViewModel,
                     onExerciseCreated = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     }
                 )
             }
+
+            // ===== INFO SESSION =====
             composable(
                 route = "${NextRepScreen.InfoSessionPage.name}/{sessionId}",    // 🔹 route avec argument
                 arguments = listOf(
                     navArgument("sessionId") { type = NavType.IntType }         // 🔹 définition de l'argument
                 )
             ) { backStackEntry ->
-                val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable  // 🔹 on récupère l'ID
+                val sessionId =
+                    backStackEntry.arguments?.getInt("sessionId") ?: return@composable  // 🔹 on récupère l'ID
 
                 InfoSessionPage(
-                    sessionId = sessionId,                                      // 🔹 on passe l'ID à l'écran
-                    sessionsViewModel = sessionsViewModel,                      // 🔹 on passe le ViewModel des sessions
+                    sessionId = sessionId,
+                    sessionsViewModel = sessionsViewModel,
                     onExerciseAdded = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     },
@@ -196,6 +203,8 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== SESSIONS LIST =====
             composable(route = NextRepScreen.SessionsListPage.name) {
                 SessionsListPage(
                     sessionsViewModel = sessionsViewModel,
@@ -207,8 +216,10 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== CREATION SESSION =====
             composable(route = NextRepScreen.SessionCreationPage.name) {
-                val sessionsUiState by sessionsViewModel.uiState.collectAsState()   // 🔹 observe l'état des sessions
+                val sessionsUiState by sessionsViewModel.uiState.collectAsState()
 
                 SessionCreationPage(
                     sessionsViewModel = sessionsViewModel,
@@ -222,6 +233,8 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== CONGRATS =====
             composable(route = NextRepScreen.CongratulationsPage.name) {
                 CongratulationsPage(
                     onNavigateHome = {
@@ -232,31 +245,30 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== SETTINGS =====
             composable(route = NextRepScreen.SettingsPage.name) {
                 SettingsPage()
             }
-            composable(route = NextRepScreen.StatsPage.name) {
-                StatsPage()
-            }
-            composable(route = "ExercisesForNewSession") {                       // 🔹 écran de sélection des exos pour créer une session
+
+            // ===== EXERCICES POUR NOUVELLE SESSION =====
+            composable(route = "ExercisesForNewSession") {
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
                     onExerciseClick = { /* en mode sélection on ignore le clic simple */ },
-                    selectionMode = true,                                        // 🔹 active le mode sélection
+                    selectionMode = true,
                     onValidateSelection = { selectedExercises ->
-                        // 🔹 ici on crée une nouvelle session avec les exos sélectionnés
                         val newSession = Session(
                             id = 0,
-                            name = "Nouvelle session",                           // 🔹 tu pourras ajouter un TextField pour le nom plus tard
+                            name = "Nouvelle session",
                             date = "Date à définir",
                             exercises = selectedExercises
                         )
                         sessionsViewModel.addSession(newSession)
 
-                        // 🔹 on revient à la liste des sessions
                         navController.popBackStack(
                             NextRepScreen.SessionsListPage.name,
                             inclusive = false
@@ -264,6 +276,8 @@ fun NextRepApp(
                     }
                 )
             }
+
+            // ===== CHOIX EXOS POUR CREATION SESSION =====
             composable(route = "chooseExercises") {
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
@@ -271,20 +285,23 @@ fun NextRepApp(
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
                     onExerciseClick = { /* pas utilisé en mode sélection */ },
-                    selectionMode = true,                                            // 🔹 active le mode sélection
+                    selectionMode = true,
                     onValidateSelection = { selectedExercises ->
-                        sessionsViewModel.setPendingExercisesForNewSession(selectedExercises)  // 🔹 stocke dans le VM
-                        navController.popBackStack()                                             // 🔹 retour à SessionCreationPage
+                        sessionsViewModel.setPendingExercisesForNewSession(selectedExercises)
+                        navController.popBackStack()
                     }
                 )
             }
+
+            // ===== WORKOUT LIVE =====
             composable(
                 route = "WorkoutLive/{sessionId}",
                 arguments = listOf(
                     navArgument("sessionId") { type = NavType.IntType }
                 )
             ) { backStackEntry ->
-                val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable
+                val sessionId =
+                    backStackEntry.arguments?.getInt("sessionId") ?: return@composable
 
                 val scope = rememberCoroutineScope()
 
@@ -305,26 +322,36 @@ fun NextRepApp(
                 )
             }
 
+            // ===== HISTORIQUE D'UN EXO (détail) =====
             composable(
                 route = "ExerciseHistory/{exerciseId}",
                 arguments = listOf(
                     navArgument("exerciseId") { type = NavType.IntType }
                 )
             ) { backStackEntry ->
-                val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: return@composable
+                val exerciseId =
+                    backStackEntry.arguments?.getInt("exerciseId") ?: return@composable
 
                 ExerciseHistoryPage(
                     exerciseId = exerciseId,
                     exercisesViewModel = exercisesViewModel,
-                    workoutHistoryRepository = workoutHistoryRepository   // 🔹 maintenant ça marche
+                    workoutHistoryRepository = workoutHistoryRepository
                 )
             }
 
-
-
-
-
-
+            // ===== NOUVEL ONGLET : LISTE DES EXOS POUR HISTORIQUE =====
+            composable(route = NextRepScreen.ExercisesHistoryPage.name) {
+                ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,
+                    onAddExercise = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    },
+                    // 🔹 Ici : clic sur un exo -> historique de cet exo
+                    onExerciseClick = { exerciseId ->
+                        navController.navigate("ExerciseHistory/$exerciseId")
+                    }
+                )
+            }
         }
     }
 }
