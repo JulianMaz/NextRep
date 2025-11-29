@@ -1,6 +1,5 @@
 package com.example.nextrep.ui.screens
 
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,14 +16,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.WorkoutHistoryRepository   // adapte le package si besoin
+import com.example.nextrep.models.WorkoutHistoryRepository
 import com.example.nextrep.models.WorkoutSetEntity
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+/**
+ * Clé représentant UN run d'entraînement pour une session donnée.
+ *
+ * Même session refaite plusieurs fois -> plusieurs clés différentes
+ * grâce au timestamp utilisé lors de l’enregistrement des sets.
+ */
+data class WorkoutInstanceKey(
+    val sessionId: Int,
+    val sessionName: String,
+    val sessionDate: String,
+    val workoutTimestamp: Long
+)
 
 @Composable
 fun ExerciseHistoryPage(
@@ -33,17 +48,24 @@ fun ExerciseHistoryPage(
     workoutHistoryRepository: WorkoutHistoryRepository,
     modifier: Modifier = Modifier
 ) {
-    // 🔹 Récupérer les infos de l'exercice (nom, etc.)
+    // 🔹 Récupérer les infos de l'exercice (nom, description)
     val exercisesUiState by exercisesViewModel.uiState.collectAsState()
     val exercise = exercisesUiState.exercises.firstOrNull { it.id == exerciseId }
 
-    // 🔹 Récupérer l'historique des sets pour cet exercice
+    // 🔹 Récupérer l'historique des sets pour cet exercice,
+    // puis regrouper par "run" (sessionId + timestamp)
     val historyFlow = remember(exerciseId) {
         workoutHistoryRepository
             .getHistoryForExercise(exerciseId)
-            // On groupe par session (id + nom + date)
             .map { list ->
-                list.groupBy { Triple(it.sessionId, it.sessionName, it.sessionDate) }
+                list.groupBy { set ->
+                    WorkoutInstanceKey(
+                        sessionId = set.sessionId,
+                        sessionName = set.sessionName,
+                        sessionDate = set.sessionDate,
+                        workoutTimestamp = set.timestamp
+                    )
+                }
             }
     }
 
@@ -85,21 +107,32 @@ fun ExerciseHistoryPage(
                     .padding(top = 32.dp)
             )
         } else {
+            // 🔹 On trie les runs de la plus récente à la plus ancienne
+            val sortedEntries = groupedHistory.entries
+                .sortedByDescending { it.key.workoutTimestamp }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                groupedHistory.forEach { (sessionKey, sets) ->
-                    val (sessionId, sessionName, sessionDate) = sessionKey
-
-                    item(key = "session-$sessionId-$sessionDate") {
-                        SessionHistoryCard(
-                            sessionName = sessionName,
-                            sessionDate = sessionDate,
-                            sets = sets
-                        )
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                items(
+                    items = sortedEntries,
+                    key = { entry ->
+                        "${entry.key.sessionId}-${entry.key.workoutTimestamp}"
                     }
+                ) { entry ->
+                    val key = entry.key
+                    val sets = entry.value
+
+                    SessionHistoryCard(
+                        sessionName = key.sessionName,
+                        sessionDate = key.sessionDate,
+                        workoutTimestamp = key.workoutTimestamp,
+                        sets = sets
+                    )
+
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
                 }
             }
         }
@@ -110,8 +143,14 @@ fun ExerciseHistoryPage(
 private fun SessionHistoryCard(
     sessionName: String,
     sessionDate: String,
+    workoutTimestamp: Long,
     sets: List<WorkoutSetEntity>
 ) {
+    val dateTimeFormatter = remember {
+        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    }
+    val dateTimeText = dateTimeFormatter.format(workoutTimestamp)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -124,18 +163,21 @@ private fun SessionHistoryCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // 🔹 Titre : nom de la session
             Text(
                 text = sessionName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
+
+            // 🔹 Sous-titre : date de la session + horodatage du run
             Text(
-                text = sessionDate,
+                text = "Session date: $sessionDate – Run: $dateTimeText",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Liste des sets : "Set 1: 40 kg x 8"
+            // 🔹 Liste des sets de CE run UNIQUEMENT
             sets.sortedBy { it.setIndex }.forEach { set ->
                 Text(
                     text = "Set ${set.setIndex}: ${set.weightKg} kg x ${set.reps}",
