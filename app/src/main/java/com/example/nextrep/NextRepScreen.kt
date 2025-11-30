@@ -340,7 +340,36 @@ fun NextRepApp(
                         }
                     },
                     onAddExercisesClick = {
+                        // 🔹 C’est cette navigation qui plantait avant
                         navController.navigate("chooseExercisesForWorkout/$sessionId")
+                    }
+                )
+            }
+
+            // ===== CHOIX EXOS PENDANT L’ENTRAÎNEMENT =====
+            composable(
+                route = "chooseExercisesForWorkout/{sessionId}",
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val sessionId =
+                    backStackEntry.arguments?.getInt("sessionId") ?: return@composable
+
+                // 🔹 On réutilise la même page en mode sélection
+                ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,
+                    onAddExercise = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    },
+                    onExerciseClick = { /* pas utilisé en mode sélection */ },
+                    selectionMode = true,
+                    onValidateSelection = { selectedExercises ->
+                        // 🔹 À ce stade tu peux :
+                        //  - soit mettre à jour la session via SessionsViewModel
+                        //  - soit propager vers un ViewModel dédié au WorkoutLive
+                        // Pour l’instant : on revient simplement à l’écran d’entraînement.
+                        navController.popBackStack()
                     }
                 )
             }
