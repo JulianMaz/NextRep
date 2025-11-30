@@ -35,7 +35,6 @@ import com.example.nextrep.ui.screens.SessionCreationPage
 import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
-import com.example.nextrep.data.models.Session
 import com.example.nextrep.models.*
 import com.example.nextrep.ui.components.NextRepTopBar
 import com.example.nextrep.ui.screens.WorkoutLivePage
