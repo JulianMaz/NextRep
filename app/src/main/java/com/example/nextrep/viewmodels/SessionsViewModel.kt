@@ -1,57 +1,49 @@
 package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.nextrep.data.exercise.ExerciseDao
-import com.example.nextrep.data.models.Exercise
-import com.example.nextrep.data.models.Session
-import com.example.nextrep.data.models.SessionExerciseCrossRef
-import com.example.nextrep.data.models.SessionWithExercises
-import com.example.nextrep.data.session.SessionDao
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import com.example.nextrep.models.Exercise          // 🔹 Exercise pour la sélection
+import com.example.nextrep.models.Session
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class SessionsUiState(
-    val sessions: List<SessionWithExercises> = emptyList()
+    val sessions: List<Session> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val pendingExercisesForNewSession: List<Exercise> = emptyList()   // 🔹 exos choisis pour la prochaine session
 )
 
-class SessionsViewModel(
-    private val sessionDao: SessionDao,
-    private val exerciseDao: ExerciseDao
-) : ViewModel() {
+class SessionsViewModel : ViewModel() {
 
-    val uiState: StateFlow<SessionsUiState> =
-        sessionDao.getAllSessionsWithExercises()
-            .map { SessionsUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = SessionsUiState()
-            )
+    private val _uiState = MutableStateFlow(SessionsUiState())
+    val uiState: StateFlow<SessionsUiState> = _uiState.asStateFlow()
 
-    fun addSessionWithExercises(session: Session, exercises: List<Exercise>) {
-        viewModelScope.launch {
-            val sessionId = sessionDao.insertSession(session).toInt()
+    private var nextId = 1
 
-            exercises.forEach { exercise ->
-                val exerciseId = exerciseDao.insertExercise(exercise).toInt()
-                sessionDao.insertCrossRef(
-                    SessionExerciseCrossRef(
-                        sessionId = sessionId,
-                        exerciseId = exerciseId
-                    )
-                )
-            }
-        }
+    fun addSession(session: Session) {
+        val newSession = session.copy(id = nextId++)
+        val updated = _uiState.value.sessions + newSession
+
+        _uiState.value = _uiState.value.copy(
+            sessions = updated,
+            errorMessage = null,
+            pendingExercisesForNewSession = emptyList()     // 🔹 on nettoie la sélection
+        )
     }
 
-    fun deleteSession(session: Session) {
-        viewModelScope.launch {
-            sessionDao.deleteSession(session)
-        }
+    fun setPendingExercisesForNewSession(exercises: List<Exercise>) { // 🔹 appelée depuis chooseExercises
+        _uiState.value = _uiState.value.copy(
+            pendingExercisesForNewSession = exercises
+        )
     }
 
-    fun getSessionWithExercises(sessionId: Int): Flow<SessionWithExercises> {
-        return sessionDao.getSessionWithExercises(sessionId)
+    fun deleteSession(sessionId: Int) {
+        val updated = _uiState.value.sessions.filterNot { it.id == sessionId }
+        _uiState.value = _uiState.value.copy(sessions = updated)
+    }
+
+    fun getSessionById(sessionId: Int): Session? {
+        return _uiState.value.sessions.firstOrNull { it.id == sessionId }
     }
 }

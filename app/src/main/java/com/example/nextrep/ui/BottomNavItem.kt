@@ -1,41 +1,39 @@
 package com.example.nextrep.ui
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.nextrep.NextRepScreen
 
-// Data class to represent each item in the bottom navigation bar
 data class BottomNavItem(
+    val route: String,
     val label: String,
-    val icon: ImageVector,
-    val route: String
+    val icon: ImageVector
 )
 
-// List of items to display in the bottom navigation bar
+// 🔹 Items de la bottom bar
 val bottomNavItems = listOf(
     BottomNavItem(
+        route = NextRepScreen.HomePage.name,
         label = "Home",
-        icon = Icons.Default.Home,
-        route = NextRepScreen.HomePage.name
+        icon = Icons.Filled.Home
     ),
     BottomNavItem(
+        route = NextRepScreen.SessionsListPage.name,
         label = "Sessions",
-        icon = Icons.Default.AddCircle,
-        route = NextRepScreen.SessionsListPage.name
+        icon = Icons.Filled.List
     ),
     BottomNavItem(
+        route = NextRepScreen.ExercisesListPage.name,
         label = "Exercises",
-        icon = Icons.Default.Build,
-        route = NextRepScreen.ExercisesListPage.name
+        icon = Icons.Filled.FitnessCenter
     ),
     BottomNavItem(
-        label = "Stats",
-        icon = Icons.Default.Star,
-        route = NextRepScreen.StatsPage.name
+        route = NextRepScreen.AllExercisesHistoryPage.name,
+        label = "History",
+        icon = Icons.Filled.History
     )
 )
