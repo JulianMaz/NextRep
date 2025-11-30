@@ -9,11 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.nextrep.models.Session
 import com.example.nextrep.viewmodels.SessionsViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,9 +28,11 @@ fun SessionsListPage(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddSession) {
-                Icon(Icons.Default.Add, contentDescription = "Add Session")
-            }
+            ExtendedFloatingActionButton(
+                onClick = onAddSession,
+                icon = { Icon(Icons.Default.Add, contentDescription = "Add Session") },
+                text = { Text("New Session") },
+            )
         }
     ) { innerPadding ->
         Column(

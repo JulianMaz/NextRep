@@ -17,22 +17,22 @@ data class BottomNavItem(
 // 🔹 Items de la bottom bar
 val bottomNavItems = listOf(
     BottomNavItem(
-        route = NextRepScreen.HomePage.name,
+        route = NextRepScreen.HomePage.name,          // 🔴 IMPORTANT : route EXACTEMENT identique
         label = "Home",
         icon = Icons.Filled.Home
     ),
     BottomNavItem(
-        route = NextRepScreen.SessionsListPage.name,
+        route = NextRepScreen.SessionsListPage.name,  // 🔴 idem
         label = "Sessions",
         icon = Icons.Filled.List
     ),
     BottomNavItem(
-        route = NextRepScreen.ExercisesListPage.name,
+        route = NextRepScreen.ExercisesListPage.name, // 🔴 idem
         label = "Exercises",
         icon = Icons.Filled.FitnessCenter
     ),
     BottomNavItem(
-        route = NextRepScreen.AllExercisesHistoryPage.name,
+        route = NextRepScreen.AllExercisesHistoryPage.name,  // 🔴 onglet History
         label = "History",
         icon = Icons.Filled.History
     )

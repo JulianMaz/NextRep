@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +18,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun HomePage(
-    newSessionCreated: () -> Unit,
+    onStartTraining: () -> Unit,              // 🔹 callback unique
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -34,12 +32,12 @@ fun HomePage(
         }
 
         ExtendedFloatingActionButton(
-            onClick = { newSessionCreated() },
-            icon = { Icon(Icons.Default.Add, contentDescription = "Add Session") },
-            text = { Text(text = "New Session") },
+            onClick = { onStartTraining() },   // 🔹 lance la sélection de session
+            icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Start training") },
+            text = { Text(text = "Start training") },
             modifier = Modifier
-                .align(Alignment.BottomEnd) // Place le bouton en bas à droite
-                .padding(16.dp)             // Ajoute une marge pour ne pas coller au bord
+                .align(Alignment.BottomEnd)
+                .padding(15.dp,38.dp)
         )
     }
 }
@@ -48,6 +46,6 @@ fun HomePage(
 @Composable
 fun HomePagePreview(){
     HomePage(
-        newSessionCreated = {}
+        onStartTraining = {}
     )
 }

@@ -3,7 +3,7 @@ package com.example.nextrep
 import androidx.room.Room
 import androidx.compose.ui.platform.LocalContext
 import com.example.nextrep.data.NextRepDatabase
-import androidx.compose.runtime.collectAsState           // 🔹 pour Flow/StateFlow.collectAsState()
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -51,11 +51,10 @@ enum class NextRepScreen(@StringRes val title: Int) {
     ExercisesListPage(title = R.string.exercises_list_page),
     SessionsListPage(title = R.string.sessions_list_page),
 
-    InfoSessionPage(title = R.string.main_session_page),  // tu pourras renommer la string plus tard
+    InfoSessionPage(title = R.string.main_session_page),
     ExerciseCreationPage(title = R.string.exercise_creation_page),
     SessionCreationPage(title = R.string.session_creation_page),
 
-    // 🔹 Nouvel écran pour l'onglet "Historique exos" (vraie page distincte)
     AllExercisesHistoryPage(title = R.string.exercises_list_page),
 
     CongratulationsPage(title = R.string.congratulations_page),
@@ -69,18 +68,17 @@ fun NextRepApp(
     val sessionsViewModel: SessionsViewModel = viewModel()
     val exercisesViewModel: ExercisesViewModel = viewModel()
 
-    // Routes qui affichent la bottom bar
+    // 🔹 Routes qui affichent la bottom bar
     val bottomBarRoutes = setOf(
         NextRepScreen.HomePage.name,
-        NextRepScreen.ExercisesListPage.name,
         NextRepScreen.SessionsListPage.name,
-        NextRepScreen.AllExercisesHistoryPage.name        // 🔹 onglet History
+        NextRepScreen.ExercisesListPage.name,
+        NextRepScreen.AllExercisesHistoryPage.name
     )
 
     //======= DB REPO =======
     val context = LocalContext.current.applicationContext
 
-    // 🔹 Initialisation DATABASE
     val db = remember {
         Room.databaseBuilder(
             context,
@@ -89,10 +87,8 @@ fun NextRepApp(
         ).build()
     }
 
-    // 🔹 DAO
     val workoutSetDao = db.workoutSetDao()
 
-    // 🔹 Repository
     val workoutHistoryRepository = remember {
         WorkoutHistoryRepository(workoutSetDao)
     }
@@ -100,7 +96,7 @@ fun NextRepApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showBottomBar = currentRoute in bottomBarRoutes
-    val showTopBar = currentRoute != NextRepScreen.CongratulationsPage.name // Exemple pour l'instant
+    val showTopBar = currentRoute != NextRepScreen.CongratulationsPage.name
 
     Scaffold(
         topBar = {
@@ -111,8 +107,11 @@ fun NextRepApp(
                     },
                     onHomeClick = {
                         navController.navigate(NextRepScreen.HomePage.name) {
-                            // Nettoyer la pile de retour pour éviter d'empiler les pages
-                            popUpTo(NextRepScreen.HomePage.name) { inclusive = true }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
@@ -145,14 +144,22 @@ fun NextRepApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NextRepScreen.HomePage.name,
+            startDestination = NextRepScreen.HomePage.name,   // 🔹 Home = startDestination
             modifier = Modifier.padding(innerPadding)
         ) {
             // ===== HOME =====
+            // ===== HOME =====
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
-                    newSessionCreated = {
-                        navController.navigate(NextRepScreen.SessionCreationPage.name)   // 🔹 On va créer une session
+                    onStartTraining = {
+                        // 🔹 On aligne la navigation sur celle de la bottom bar
+                        navController.navigate(NextRepScreen.SessionsListPage.name) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -164,7 +171,6 @@ fun NextRepApp(
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    // 🔹 Clic sur un exo -> page d'info de l'exercice
                     onExerciseClick = { exerciseId ->
                         navController.navigate("ExerciseInfo/$exerciseId")
                     }
@@ -202,13 +208,13 @@ fun NextRepApp(
 
             // ===== INFO SESSION =====
             composable(
-                route = "${NextRepScreen.InfoSessionPage.name}/{sessionId}",    // 🔹 route avec argument
+                route = "${NextRepScreen.InfoSessionPage.name}/{sessionId}",
                 arguments = listOf(
-                    navArgument("sessionId") { type = NavType.IntType }         // 🔹 définition de l'argument
+                    navArgument("sessionId") { type = NavType.IntType }
                 )
             ) { backStackEntry ->
                 val sessionId =
-                    backStackEntry.arguments?.getInt("sessionId") ?: return@composable  // 🔹 on récupère l'ID
+                    backStackEntry.arguments?.getInt("sessionId") ?: return@composable
 
                 InfoSessionPage(
                     sessionId = sessionId,
@@ -217,7 +223,7 @@ fun NextRepApp(
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     },
                     onStartWorkout = { id ->
-                        navController.navigate("WorkoutLive/$id")     // 🔹 lancement direct
+                        navController.navigate("WorkoutLive/$id")
                     },
                     onFinishWorkout = {
                         navController.navigate(NextRepScreen.CongratulationsPage.name) {
@@ -248,10 +254,9 @@ fun NextRepApp(
                     sessionsViewModel = sessionsViewModel,
                     uiState = sessionsUiState,
                     onChooseExercises = {
-                        navController.navigate("chooseExercises")                   // 🔹 ouvre la sélection d'exos
+                        navController.navigate("chooseExercises")
                     },
                     onSessionCreated = {
-                        // 🔹 On revient simplement à l'écran précédent (souvent SessionsListPage)
                         navController.popBackStack()
                     }
                 )
@@ -262,7 +267,6 @@ fun NextRepApp(
                 CongratulationsPage(
                     onNavigateHome = {
                         navController.navigate(NextRepScreen.HomePage.name) {
-                            // Clear the entire back stack up to the home page
                             popUpTo(NextRepScreen.HomePage.name) { inclusive = true }
                         }
                     }
@@ -274,14 +278,14 @@ fun NextRepApp(
                 SettingsPage()
             }
 
-            // ===== EXERCICES POUR NOUVELLE SESSION =====
+            // ===== EXOS POUR NOUVELLE SESSION =====
             composable(route = "ExercisesForNewSession") {
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = { /* en mode sélection on ignore le clic simple */ },
+                    onExerciseClick = { },
                     selectionMode = true,
                     onValidateSelection = { selectedExercises ->
                         val newSession = Session(
@@ -307,7 +311,7 @@ fun NextRepApp(
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = { /* pas utilisé en mode sélection */ },
+                    onExerciseClick = { },
                     selectionMode = true,
                     onValidateSelection = { selectedExercises ->
                         sessionsViewModel.setPendingExercisesForNewSession(selectedExercises)
@@ -340,13 +344,12 @@ fun NextRepApp(
                         }
                     },
                     onAddExercisesClick = {
-                        // 🔹 C’est cette navigation qui plantait avant
                         navController.navigate("chooseExercisesForWorkout/$sessionId")
                     }
                 )
             }
 
-            // ===== CHOIX EXOS PENDANT L’ENTRAÎNEMENT =====
+            // ===== CHOIX EXOS PENDANT WORKOUT =====
             composable(
                 route = "chooseExercisesForWorkout/{sessionId}",
                 arguments = listOf(
@@ -356,25 +359,21 @@ fun NextRepApp(
                 val sessionId =
                     backStackEntry.arguments?.getInt("sessionId") ?: return@composable
 
-                // 🔹 On réutilise la même page en mode sélection
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
-                    onExerciseClick = { /* pas utilisé en mode sélection */ },
+                    onExerciseClick = { },
                     selectionMode = true,
                     onValidateSelection = { selectedExercises ->
-                        // 🔹 À ce stade tu peux :
-                        //  - soit mettre à jour la session via SessionsViewModel
-                        //  - soit propager vers un ViewModel dédié au WorkoutLive
-                        // Pour l’instant : on revient simplement à l’écran d’entraînement.
+                        // TODO : mettre à jour la session / workout live si tu veux
                         navController.popBackStack()
                     }
                 )
             }
 
-            // ===== HISTORIQUE D'UN EXO (détail) =====
+            // ===== HISTORIQUE D'UN EXO =====
             composable(
                 route = "ExerciseHistory/{exerciseId}",
                 arguments = listOf(
@@ -391,7 +390,7 @@ fun NextRepApp(
                 )
             }
 
-            // ===== NOUVEL ONGLET : ALL EXERCISES HISTORY =====
+            // ===== ONGLET : ALL EXERCISES HISTORY =====
             composable(route = NextRepScreen.AllExercisesHistoryPage.name) {
                 AllExercisesHistoryPage(
                     exercisesViewModel = exercisesViewModel,
