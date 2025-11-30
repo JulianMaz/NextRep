@@ -1,5 +1,6 @@
 package com.example.nextrep
 
+import com.example.nextrep.models.ExercisesRepository
 import androidx.room.Room
 import androidx.compose.ui.platform.LocalContext
 import com.example.nextrep.data.NextRepDatabase
@@ -15,6 +16,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -84,13 +86,27 @@ fun NextRepApp(
             context,
             NextRepDatabase::class.java,
             "nextrep-db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     val workoutSetDao = db.workoutSetDao()
 
+    val exerciseDao = db.exerciseDao()
+    val exercisesRepository = remember {
+        ExercisesRepository(exerciseDao)
+    }
+
+
     val workoutHistoryRepository = remember {
         WorkoutHistoryRepository(workoutSetDao)
+    }
+
+    LaunchedEffect(Unit) {
+        // 🔹 On charge les exos persistés au lancement de l’app
+        val exercisesFromDb = exercisesRepository.getAllExercises()
+        exercisesViewModel.setExercises(exercisesFromDb)    // (fonction qu’on ajoute juste après)
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -169,7 +185,13 @@ fun NextRepApp(
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
-                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onExerciseClick = { exerciseId ->
                         navController.navigate("ExerciseInfo/$exerciseId")
@@ -181,6 +203,7 @@ fun NextRepApp(
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
                 ExerciseCreationPage(
                     exercisesViewModel = exercisesViewModel,
+                    exercisesRepository = exercisesRepository,          // 🔹 NOUVEAU
                     onExerciseCreated = {
                         navController.navigate(NextRepScreen.ExercisesListPage.name)
                     }

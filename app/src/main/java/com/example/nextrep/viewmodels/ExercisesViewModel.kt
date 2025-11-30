@@ -37,4 +37,18 @@ class ExercisesViewModel : ViewModel() {
     fun getExerciseById(id: Int): Exercise? {
         return _uiState.value.exercises.firstOrNull { it.id == id }
     }
+
+    // 🔹 Pour initialiser depuis la base au démarrage
+    fun setExercises(exercises: List<Exercise>) {
+        _uiState.value = _uiState.value.copy(
+            exercises = exercises
+        )
+    }
+
+    // 🔹 Pour ajouter un exo déjà “persisté” (avec son id) dans le state
+    fun addExerciseLocal(exercise: Exercise) {
+        _uiState.value = _uiState.value.copy(
+            exercises = _uiState.value.exercises + exercise
+        )
+    }
 }

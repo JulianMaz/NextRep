@@ -31,7 +31,7 @@ fun ExercisesListPage(
         floatingActionButton = {
             if (!selectionMode) {                             // 🔹 on cache le FAB en mode sélection
                 ExtendedFloatingActionButton(
-                    onClick = { onAddExercise},
+                    onClick = { onAddExercise() },
                     icon = { Icon(Icons.Default.Add, contentDescription = "Add Exercise")},
                     text = { Text(text = "New Exercices") },
                 )
