@@ -7,9 +7,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -67,25 +67,26 @@ fun ExerciseCreationPage(
 
         Button(
             onClick = {
+                // petite validation simple
                 if (name.isBlank()) return@Button
 
                 val baseExercise = Exercise(
-                    id = 0, // 🔹 sera généré par Room
+                    id = 0, // Room va générer l’ID
                     name = name,
                     description = description,
                     series = series.toIntOrNull() ?: 0,
                     repetitions = reps.toIntOrNull() ?: 0,
-                    photoUri = null      // tu pourras gérer la photo plus tard
+                    photoUri = null
                 )
 
                 scope.launch {
-                    // 1️⃣ on persiste en base
+                    // 1️⃣ on persiste dans la base
                     val saved = exercisesRepository.addExercise(baseExercise)
 
-                    // 2️⃣ on met à jour le ViewModel avec l’exo “complet” (id généré)
+                    // 2️⃣ on met à jour le ViewModel (UI)
                     exercisesViewModel.addExerciseLocal(saved)
 
-                    // 3️⃣ on revient à la liste
+                    // 3️⃣ on revient à l’écran précédent (liste)
                     onExerciseCreated()
                 }
             },

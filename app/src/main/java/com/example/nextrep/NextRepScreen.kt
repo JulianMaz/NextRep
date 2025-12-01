@@ -203,9 +203,11 @@ fun NextRepApp(
             composable(route = NextRepScreen.ExerciseCreationPage.name) {
                 ExerciseCreationPage(
                     exercisesViewModel = exercisesViewModel,
-                    exercisesRepository = exercisesRepository,          // 🔹 NOUVEAU
+                    exercisesRepository = exercisesRepository,
                     onExerciseCreated = {
-                        navController.navigate(NextRepScreen.ExercisesListPage.name)
+                        // 🔹 IMPORTANT : on revient juste en arrière
+                        // au lieu de re-naviguer vers la liste.
+                        navController.popBackStack()
                     }
                 )
             }
