@@ -98,7 +98,6 @@ fun NextRepApp(
         ExercisesRepository(exerciseDao)
     }
 
-
     val workoutHistoryRepository = remember {
         WorkoutHistoryRepository(workoutSetDao)
     }
@@ -106,7 +105,7 @@ fun NextRepApp(
     LaunchedEffect(Unit) {
         // 🔹 On charge les exos persistés au lancement de l’app
         val exercisesFromDb = exercisesRepository.getAllExercises()
-        exercisesViewModel.setExercises(exercisesFromDb)    // (fonction qu’on ajoute juste après)
+        exercisesViewModel.setExercises(exercisesFromDb)
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -160,15 +159,13 @@ fun NextRepApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NextRepScreen.HomePage.name,   // 🔹 Home = startDestination
+            startDestination = NextRepScreen.HomePage.name,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // ===== HOME =====
             // ===== HOME =====
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
                     onStartTraining = {
-                        // 🔹 On aligne la navigation sur celle de la bottom bar
                         navController.navigate(NextRepScreen.SessionsListPage.name) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -180,18 +177,13 @@ fun NextRepApp(
                 )
             }
 
-            // ===== EXERCISES (onglet classique) =====
+            // ===== EXERCISES (onglet principal) =====
             composable(route = NextRepScreen.ExercisesListPage.name) {
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
-                        navController.navigate(NextRepScreen.ExerciseCreationPage.name) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        // 🔹 ICI : navigation simple, on garde ExercisesListPage dans la pile
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
                     onExerciseClick = { exerciseId ->
                         navController.navigate("ExerciseInfo/$exerciseId")
@@ -205,8 +197,7 @@ fun NextRepApp(
                     exercisesViewModel = exercisesViewModel,
                     exercisesRepository = exercisesRepository,
                     onExerciseCreated = {
-                        // 🔹 IMPORTANT : on revient juste en arrière
-                        // au lieu de re-naviguer vers la liste.
+                        // 🔹 On revient à l’écran précédent (liste, choix, etc.)
                         navController.popBackStack()
                     }
                 )
@@ -308,6 +299,7 @@ fun NextRepApp(
                 ExercisesListPage(
                     exercisesViewModel = exercisesViewModel,
                     onAddExercise = {
+                        // 🔹 même logique : on va sur la page de création sans nettoyer la pile
                         navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     },
                     onExerciseClick = { },
