@@ -166,6 +166,7 @@ fun NextRepApp(
             composable(route = NextRepScreen.HomePage.name) {
                 HomePage(
                     onStartTraining = {
+                        // 🔹 Aller vers la liste des sessions pour démarrer un training
                         navController.navigate(NextRepScreen.SessionsListPage.name) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -173,6 +174,12 @@ fun NextRepApp(
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    onNewSessionClick = {
+                        navController.navigate(NextRepScreen.SessionCreationPage.name)
+                    },
+                    onNewExerciseClick = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
                     }
                 )
             }
