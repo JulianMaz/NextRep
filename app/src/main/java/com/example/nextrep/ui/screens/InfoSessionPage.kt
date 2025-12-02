@@ -88,15 +88,6 @@ fun InfoSessionPage(
             }
         }
 
-        // 🔹 Boutons d'action
-        Button(
-            onClick = onExerciseAdded,
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxSize(fraction = 0.1f)
-        ) {
-            Text("Add exercise")
-        }
         Button(
             onClick = { onStartWorkout(sessionId) },
             modifier = Modifier
@@ -104,15 +95,6 @@ fun InfoSessionPage(
                 .padding(top = 16.dp)
         ) {
             Text("Commencer l’entraînement")
-        }
-
-        Button(
-            onClick = onFinishWorkout,
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxSize(fraction = 0.1f)
-        ) {
-            Text("Finish workout")
         }
     }
 }

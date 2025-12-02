@@ -24,17 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.models.Exercise
 import com.example.nextrep.models.Session
 import com.example.nextrep.models.WorkoutSetEntity
 import com.example.nextrep.viewmodels.SessionsViewModel
-import kotlinx.coroutines.delay
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.viewmodels.WorkoutViewModel
-import com.example.nextrep.viewmodels.WorkoutExerciseState
-import com.example.nextrep.viewmodels.WorkoutSetState
+import kotlinx.coroutines.delay
 
 // 🔹 Représente l'état d'une ligne de set pour un exercice
 data class SetRowState(
@@ -58,9 +55,9 @@ data class SetRowState(
 fun WorkoutLivePage(
     sessionId: Int,
     sessionsViewModel: SessionsViewModel,
-    workoutViewModel: WorkoutViewModel = viewModel(),  // 🔹 nouveau param avec valeur par défaut
+    workoutViewModel: WorkoutViewModel = viewModel(),
     onFinishWorkout: (List<WorkoutSetEntity>) -> Unit,
-    onAddExercisesClick: () -> Unit,                 // 🔹 ouvre la sélection d'exercices
+    onAddExercisesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // 🔹 Récupère la session en cours
@@ -108,11 +105,10 @@ fun WorkoutLivePage(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // ===== HEADER LIVE =====
+        // ===== HEADER LIVE (timer + Finish sur une ligne) =====
         HeaderLiveSection(
             elapsedSeconds = elapsedSeconds,
             onFinishWorkout = {
-                // 🔹 Construction de la liste des WorkoutSetEntity complétés
                 val completedSets = buildCompletedWorkoutSets(
                     session = session,
                     exerciseSets = exerciseSets
@@ -135,40 +131,41 @@ fun WorkoutLivePage(
 
         // ===== LISTE D'EXERCICES =====
         if (session.exercises.isEmpty()) {
-            // 🔹 Cas "No exercises added" (comme Lyfta au début)
-            NoExercisesSection(
-                onAddExercisesClick = onAddExercisesClick
-            )
+            NoExercisesSection(onAddExercisesClick = onAddExercisesClick)
         } else {
-            // 🔹 Liste des exercices de la session
             LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 items(session.exercises, key = { it.id }) { exercise ->
-                    ExerciseLiveBlock(
-                        exercise = exercise,
-                        onSetsChanged = { setsForExercise ->
-                            // 🔹 On met à jour la map globale des sets par exercice
+
+                    // 🔹 Récupère les sets existants ou crée la liste initiale pour cet exo
+                    val setsForExercise = exerciseSets[exercise.id]
+                        ?: initialSetsForExercise(exercise).also { initial ->
                             exerciseSets = exerciseSets.toMutableMap().apply {
-                                put(exercise.id, setsForExercise)
-                            }
-                        },
-                        onSetCompletedChanged = { completed ->
-                            // 🔹 ICI : on tient à jour le compteur global de sets terminés
-                            if (completed) {
-                                totalCompletedSets += 1
-                            } else {
-                                totalCompletedSets = (totalCompletedSets - 1).coerceAtLeast(0)
+                                put(exercise.id, initial)
                             }
                         }
+
+                    ExerciseLiveBlock(
+                        exercise = exercise,
+                        sets = setsForExercise,
+                        onSetsChanged = { updatedList ->
+                            // 🔹 met à jour la map globale
+                            exerciseSets = exerciseSets.toMutableMap().apply {
+                                put(exercise.id, updatedList)
+                            }
+                            // 🔹 recalcule le nombre total de sets complétés
+                            totalCompletedSets = exerciseSets
+                                .values
+                                .flatten()
+                                .count { it.isCompleted }
+                        }
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
-                }
+                item { Spacer(modifier = Modifier.height(80.dp)) }
             }
         }
     }
@@ -185,39 +182,36 @@ private fun HeaderLiveSection(
 ) {
     val formattedTimer = formatDuration(elapsedSeconds)
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // 🔹 Timer centré en haut
+        // Timer
         Text(
             text = formattedTimer,
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Bouton Finish à droite
-            TextButton(
-                onClick = onFinishWorkout,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = MaterialTheme.shapes.large
-                    )
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = "Finish",
-                    color = MaterialTheme.colorScheme.onPrimary
+        // Bouton Finish
+        TextButton(
+            onClick = onFinishWorkout,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.large
                 )
-            }
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = "Finish",
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
@@ -247,16 +241,9 @@ private fun StatsCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // 🔹 Duration
-                StatItem(
-                    label = "Duration",
-                    value = formattedDuration
-                )
+                StatItem(label = "Duration", value = formattedDuration)
 
-                // 🔹 Volume (manuel, en kg)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Volume",
                         style = MaterialTheme.typography.labelMedium,
@@ -277,11 +264,7 @@ private fun StatsCard(
                     )
                 }
 
-                // 🔹 Sets complétés
-                StatItem(
-                    label = "Sets",
-                    value = totalCompletedSets.toString()
-                )
+                StatItem(label = "Sets", value = totalCompletedSets.toString())
             }
         }
     }
@@ -292,9 +275,7 @@ private fun StatItem(
     label: String,
     value: String
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
@@ -338,35 +319,16 @@ private fun NoExercisesSection(
     }
 }
 
+/**
+ * Bloc d’un exercice dans le live : affichage + table des sets.
+ * L’état des sets est ENTIEREMENT géré par le parent (WorkoutLivePage).
+ */
 @Composable
 private fun ExerciseLiveBlock(
     exercise: Exercise,
-    onSetsChanged: (List<SetRowState>) -> Unit,      // 🔹 informe la page de TOUTES les lignes
-    onSetCompletedChanged: (Boolean) -> Unit         // 🔹 informe la page qu'un set est (dé)coché
+    sets: List<SetRowState>,
+    onSetsChanged: (List<SetRowState>) -> Unit
 ) {
-    // 🔹 Nombre de séries défini dans la fiche de l'exercice.
-    // Si series <= 0, on garde 3 par défaut.
-    val initialSetCount = (exercise.series.takeIf { it > 0 } ?: 3)
-
-    // 🔹 On pré-remplit éventuellement les reps avec exercise.repetitions
-    val defaultReps = if (exercise.repetitions > 0) {
-        exercise.repetitions.toString()
-    } else {
-        ""
-    }
-
-    // 🔹 Liste des sets pour cet exercice, basée sur "series"
-    var sets by remember(exercise.id, initialSetCount) {
-        mutableStateOf(
-            (1..initialSetCount).map { index ->
-                SetRowState(
-                    index = index,
-                    reps = defaultReps
-                )
-            }
-        )
-    }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -379,11 +341,8 @@ private fun ExerciseLiveBlock(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // ----- En-tête exercice (image + nom) -----
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 🔹 Placeholder pour l'image (tu pourras brancher Coil plus tard)
+            // ----- En-tête exercice -----
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(56.dp)
@@ -418,7 +377,6 @@ private fun ExerciseLiveBlock(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ----- Table des sets -----
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -434,34 +392,31 @@ private fun ExerciseLiveBlock(
 
             Divider(modifier = Modifier.padding(vertical = 4.dp))
 
-            // Lignes de sets
             sets.forEach { setRow ->
                 SetRow(
                     setRow = setRow,
                     onValueChange = { updated ->
-                        // 🔹 ICI : on met à jour la liste des sets pour cet exercice
-                        sets = sets.map { if (it.index == updated.index) updated else it }
-                        onSetsChanged(sets)
+                        val newList = sets.map {
+                            if (it.index == updated.index) updated else it
+                        }
+                        onSetsChanged(newList)
                     },
-                    onCompletedToggle = { updated, newlyCompleted ->
-                        // 🔹 Met à jour la ligne
-                        sets = sets.map { if (it.index == updated.index) updated else it }
-                        onSetsChanged(sets)
-                        // 🔹 Informe la page que le nombre de sets complétés a changé
-                        onSetCompletedChanged(newlyCompleted)
+                    onCompletedToggle = { updated ->
+                        val newList = sets.map {
+                            if (it.index == updated.index) updated else it
+                        }
+                        onSetsChanged(newList)
                     }
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ----- Bouton Add set -----
             TextButton(
                 onClick = {
                     val nextIndex = (sets.maxOfOrNull { it.index } ?: 0) + 1
-                    // 🔹 Ajoute un nouveau set vide
-                    sets = sets + SetRowState(index = nextIndex)
-                    onSetsChanged(sets)
+                    val newList = sets + SetRowState(index = nextIndex)
+                    onSetsChanged(newList)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -471,16 +426,17 @@ private fun ExerciseLiveBlock(
     }
 }
 
+/**
+ * Ligne d’un set – totalement "stateless".
+ * Toute la donnée vient de SetRowState, et les modifications
+ * sont renvoyées au parent via les callbacks.
+ */
 @Composable
 private fun SetRow(
     setRow: SetRowState,
     onValueChange: (SetRowState) -> Unit,
-    onCompletedToggle: (SetRowState, Boolean) -> Unit
+    onCompletedToggle: (SetRowState) -> Unit
 ) {
-    var weight by remember(setRow.index) { mutableStateOf(setRow.weightKg) }
-    var reps by remember(setRow.index) { mutableStateOf(setRow.reps) }
-    var isCompleted by remember(setRow.index) { mutableStateOf(setRow.isCompleted) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -492,10 +448,9 @@ private fun SetRow(
         Text(setRow.previousKg, Modifier.weight(1f))
 
         OutlinedTextField(
-            value = weight,
-            onValueChange = {
-                weight = it
-                onValueChange(setRow.copy(weightKg = it, reps = reps, isCompleted = isCompleted))
+            value = setRow.weightKg,
+            onValueChange = { newWeight ->
+                onValueChange(setRow.copy(weightKg = newWeight))
             },
             modifier = Modifier
                 .weight(1f)
@@ -504,10 +459,9 @@ private fun SetRow(
         )
 
         OutlinedTextField(
-            value = reps,
-            onValueChange = {
-                reps = it
-                onValueChange(setRow.copy(weightKg = weight, reps = it, isCompleted = isCompleted))
+            value = setRow.reps,
+            onValueChange = { newReps ->
+                onValueChange(setRow.copy(reps = newReps))
             },
             modifier = Modifier
                 .weight(1f)
@@ -516,13 +470,9 @@ private fun SetRow(
         )
 
         Checkbox(
-            checked = isCompleted,
+            checked = setRow.isCompleted,
             onCheckedChange = { checked ->
-                isCompleted = checked
-                onCompletedToggle(
-                    setRow.copy(weightKg = weight, reps = reps, isCompleted = checked),
-                    checked
-                )
+                onCompletedToggle(setRow.copy(isCompleted = checked))
             },
             modifier = Modifier.weight(0.8f)
         )
@@ -530,13 +480,22 @@ private fun SetRow(
 }
 
 /**
- * Construit la liste des WorkoutSetEntity à partir :
- *  - de la session (id / nom / date / exercices)
- *  - de la map exerciseId -> List<SetRowState>
- *
- * On ne garde que :
- *  - les sets cochés (isCompleted == true)
- *  - avec un weightKg et reps parsables.
+ * Liste initiale de sets pour un exercice, basée sur :
+ *  - exercise.series (nb de sets)
+ *  - exercise.repetitions (pré-remplissage des reps)
+ */
+private fun initialSetsForExercise(exercise: Exercise): List<SetRowState> {
+    val count = (exercise.series.takeIf { it > 0 } ?: 3)
+    val defaultReps = if (exercise.repetitions > 0) exercise.repetitions.toString() else ""
+
+    return (1..count).map { index ->
+        SetRowState(index = index, reps = defaultReps)
+    }
+}
+
+/**
+ * Construit la liste des WorkoutSetEntity à partir
+ * de la session et de la map exerciseId -> List<SetRowState>.
  */
 private fun buildCompletedWorkoutSets(
     session: Session,
