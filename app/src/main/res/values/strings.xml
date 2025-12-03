@@ -8,6 +8,6 @@
     <string name="stats_page">Statistiques</string>
     <string name="congratulations_page">Félicitation</string>
     <string name="settings_page">Paramètres</string>
-
+    <string name="free_workout_page">Entraînement libre</string>
 
 </resources>

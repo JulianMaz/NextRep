@@ -14,7 +14,7 @@ data class SessionsUiState(
     val pendingExercisesForNewSession: List<Exercise> = emptyList()   // 🔹 exos choisis pour la prochaine session
 )
 
-class SessionsViewModel : ViewModel() {
+open class SessionsViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(SessionsUiState())
     val uiState: StateFlow<SessionsUiState> = _uiState.asStateFlow()
@@ -43,7 +43,7 @@ class SessionsViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(sessions = updated)
     }
 
-    fun getSessionById(sessionId: Int): Session? {
+    open fun getSessionById(sessionId: Int): Session? {
         return _uiState.value.sessions.firstOrNull { it.id == sessionId }
     }
 }

@@ -43,9 +43,12 @@ import com.example.nextrep.ui.screens.WorkoutLivePage
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
 import com.example.nextrep.models.WorkoutHistoryRepository
+import com.example.nextrep.models.WorkoutSetEntity
 import com.example.nextrep.ui.screens.ExerciseHistoryPage
 import com.example.nextrep.ui.screens.AllExercisesHistoryPage
 import com.example.nextrep.ui.screens.ExerciseInfoPage
+import com.example.nextrep.ui.screens.FreeWorkoutPage
+import com.example.nextrep.viewmodels.WorkoutViewModel
 import kotlinx.coroutines.launch
 
 enum class NextRepScreen(@StringRes val title: Int) {
@@ -60,13 +63,16 @@ enum class NextRepScreen(@StringRes val title: Int) {
     AllExercisesHistoryPage(title = R.string.exercises_list_page),
 
     CongratulationsPage(title = R.string.congratulations_page),
-    SettingsPage(title = R.string.settings_page)
+    SettingsPage(title = R.string.settings_page),
+
+    FreeWorkoutPage(title = R.string.free_workout_page)
 }
 
 @Composable
 fun NextRepApp(
     navController: NavHostController = rememberNavController()
 ) {
+    val workoutViewModel: WorkoutViewModel = viewModel()
     val sessionsViewModel: SessionsViewModel = viewModel()
     val exercisesViewModel: ExercisesViewModel = viewModel()
 
@@ -167,7 +173,8 @@ fun NextRepApp(
                 HomePage(
                     onStartTraining = {
                         // 🔹 Aller vers la liste des sessions pour démarrer un training
-                        navController.navigate(NextRepScreen.SessionsListPage.name) {
+                        navController.navigate(NextRepScreen.FreeWorkoutPage.name)
+                        {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -397,6 +404,28 @@ fun NextRepApp(
                 )
             }
 
+            // ===== CHOIX EXOS POUR FREE WORKOUT =====
+            composable(route = "chooseExercisesForFreeWorkout") {
+                ExercisesListPage(
+                    exercisesViewModel = exercisesViewModel,
+                    onAddExercise = {
+                        navController.navigate(NextRepScreen.ExerciseCreationPage.name)
+                    },
+                    onExerciseClick = { /* rien en mode sélection */ },
+                    selectionMode = true,
+                    onValidateSelection = { selectedExercises ->
+                        // 🔹 On stocke la sélection dans le savedStateHandle de FreeWorkoutPage
+                        navController
+                            .previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("freeWorkoutSelectedExercises", selectedExercises)
+
+                        // 🔹 Retour à FreeWorkoutPage
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             // ===== HISTORIQUE D'UN EXO =====
             composable(
                 route = "ExerciseHistory/{exerciseId}",
@@ -424,6 +453,33 @@ fun NextRepApp(
                     }
                 )
             }
+
+
+            composable(route = NextRepScreen.FreeWorkoutPage.name) {
+                val scope = rememberCoroutineScope()
+
+                // 🔹 On récupère la liste des exos sélectionnés (ou une liste vide au début)
+                val selectedExercises =
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.get<List<com.example.nextrep.models.Exercise>>("freeWorkoutSelectedExercises")
+                        ?: emptyList()
+
+                FreeWorkoutPage(
+                    selectedExercises = selectedExercises,   // 🔹 on passe les exos à l’écran
+                    onFinishWorkout = { completedSets ->
+                        scope.launch {
+                            workoutHistoryRepository.saveWorkoutSets(completedSets)
+                        }
+                        navController.popBackStack()
+                    },
+                    onAddExercisesClick = {
+                        // 🔹 Ouvre la liste en MODE SÉLECTION pour le Free Workout
+                        navController.navigate("chooseExercisesForFreeWorkout")
+                    }
+                )
+            }
+
         }
     }
 }
