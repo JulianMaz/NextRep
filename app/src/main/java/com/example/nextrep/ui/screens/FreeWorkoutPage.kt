@@ -70,9 +70,6 @@ fun FreeWorkoutPage(
         // ===== HEADER LIVE =====
         FreeHeaderLiveSection(
             elapsedSeconds = elapsedSeconds,
-            allSetsCompleted = exerciseSets.values
-                .flatten()              // -> List<FreeSetRowState>
-                .notEmptyOrFalse(),     // -> Boolean
             onFinishWorkout = { val completedSets = buildCompletedWorkoutSets(
                     exercises = selectedExercises,
                     exerciseSets = exerciseSets
@@ -138,7 +135,6 @@ fun FreeWorkoutPage(
 @Composable
 private fun FreeHeaderLiveSection(
     elapsedSeconds: Int,
-    allSetsCompleted: Boolean,
     onFinishWorkout: () -> Unit
 ) {
     val formattedTimer = formatDuration(elapsedSeconds)
@@ -162,13 +158,9 @@ private fun FreeHeaderLiveSection(
 
             TextButton(
                 onClick = onFinishWorkout,
-                enabled = allSetsCompleted, // 🔹 Finish cliquable seulement si tout est coché
                 modifier = Modifier
                     .background(
-                        color = if (allSetsCompleted)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = MaterialTheme.shapes.large
                     )
                     .padding(horizontal = 16.dp, vertical = 4.dp)

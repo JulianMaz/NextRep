@@ -55,7 +55,6 @@ data class SetRowState(
 fun WorkoutLivePage(
     sessionId: Int,
     sessionsViewModel: SessionsViewModel,
-    workoutViewModel: WorkoutViewModel = viewModel(),
     onFinishWorkout: (List<WorkoutSetEntity>) -> Unit,
     onAddExercisesClick: () -> Unit,
     modifier: Modifier = Modifier
