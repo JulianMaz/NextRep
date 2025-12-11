@@ -11,7 +11,7 @@ data class ExerciseEntity(
     val description: String,
     val series: Int,
     val repetitions: Int,
-    val photoUri: String?
+    val photoUri: String? // Add this field
 )
 
 // ---------- Mappers vers ton modèle UI existant ----------

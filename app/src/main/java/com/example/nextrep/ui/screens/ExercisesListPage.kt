@@ -1,5 +1,6 @@
 package com.example.nextrep.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import androidx.compose.ui.layout.ContentScale
 import com.example.nextrep.models.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
 
@@ -154,7 +157,17 @@ fun ExerciseItem(
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
+
+
         ) {
+            exercise.photoUri?.let { imageUri ->
+                Image(
+                    painter = rememberImagePainter(data = imageUri), // Charge l'image à partir de l'URI
+                    contentDescription = "Exercise Image",
+                    modifier = Modifier.size(80.dp), // Vous pouvez ajuster la taille de l'image selon vos besoins
+                    contentScale = ContentScale.Crop
+                )
+            }
             Text(text = exercise.name, style = MaterialTheme.typography.titleMedium)
         }
     }

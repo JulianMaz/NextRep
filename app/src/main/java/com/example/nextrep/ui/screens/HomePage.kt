@@ -2,6 +2,8 @@ package com.example.nextrep.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -58,70 +60,75 @@ fun HomePage(
         quotes.random()
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // ===== IMAGE HERO =====
-        HeroImageCard(
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ===== QUOTE DU JOUR =====
-        QuoteCard(
-            quote = quoteOfTheDay,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // ===== TOP EXERCISES =====
-        TopExercisesCard(
-            exercises = topExercises,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ===== 4 ACTIONS =====
+        // ===== CONTENU PRINCIPAL SCROLLABLE =====
         Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 96.dp), // 🔹 laisse de la place pour le FAB en bas
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+
+            // ===== IMAGE HERO =====
+            HeroImageCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ===== QUOTE DU JOUR =====
+            QuoteCard(
+                quote = quoteOfTheDay,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ===== 2 BOUTONS : NEW SESSION / NEW EXERCISE =====
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                HomeActionButton(
-                    title = "New session",
-                    onClick = onNewSessionClick,
-                    modifier = Modifier.weight(1f)
-                )
-                HomeActionButton(
-                    title = "New exercise",
-                    onClick = onNewExerciseClick,
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    HomeActionButton(
+                        title = "New session",
+                        onClick = onNewSessionClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    HomeActionButton(
+                        title = "New exercise",
+                        onClick = onNewExerciseClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ===== START TRAINING =====
+        // ===== START TRAINING FIXÉ EN BAS =====
         ExtendedFloatingActionButton(
             onClick = { onStartTraining() },
             icon = { Icon(Icons.Default.Add, contentDescription = "Start Training") },
             text = { Text("Start training") },
             modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
         )
     }
 }
@@ -138,7 +145,7 @@ private fun HeroImageCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .height(300.dp),
+            .height(220.dp), // 🔹 un peu plus petit pour éviter d’écraser le reste
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -146,7 +153,7 @@ private fun HeroImageCard(
             contentDescription = "NextRep Hero",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(220.dp)
                 .padding(4.dp)
                 .clip(MaterialTheme.shapes.extraLarge) // bords arrondis
         )
@@ -189,14 +196,12 @@ private fun QuoteCard(
                 .padding(horizontal = 20.dp, vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Petit label au dessus
             Text(
                 text = "Today’s quote",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold
             )
 
-            // Grosse quote au centre
             Text(
                 text = "“$quote”",
                 style = MaterialTheme.typography.headlineSmall,
@@ -205,53 +210,11 @@ private fun QuoteCard(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Ligne de base en bas (style moderne)
             Text(
                 text = "Keep pushing • NextRep",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium
             )
-        }
-    }
-}
-
-@Composable
-private fun TopExercisesCard(
-    exercises: List<Exercise>,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Your top exercises",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (exercises.isEmpty()) {
-                Text(
-                    text = "You haven’t created any exercises yet.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                exercises.forEachIndexed { index, exercise ->
-                    Text(
-                        text = "${index + 1}. ${exercise.name}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
         }
     }
 }

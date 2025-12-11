@@ -8,7 +8,7 @@ data class Exercise(
     val description: String,
     val series: Int,
     val repetitions: Int,
-    val photoUri: String? = null
+    val photoUri: String? = null // Add this field
 )
 
 data class Session(
