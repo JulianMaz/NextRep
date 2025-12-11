@@ -12,10 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.layout.ContentScale
 import com.example.nextrep.models.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,19 +24,19 @@ fun ExercisesListPage(
     exercisesViewModel: ExercisesViewModel,
     onAddExercise: () -> Unit,
     onExerciseClick: (Int) -> Unit,
-    selectionMode: Boolean = false,                          // 🔹 mode sélection pour créer une session
-    onValidateSelection: (List<Exercise>) -> Unit = {}       // 🔹 callback utilisé uniquement en mode sélection
+    selectionMode: Boolean = false,
+    onValidateSelection: (List<Exercise>) -> Unit = {}
 ) {
     val uiState by exercisesViewModel.uiState.collectAsState()
 
-    var selectedIds by remember { mutableStateOf(setOf<Int>()) }  // 🔹 ids cochés
+    var selectedIds by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         floatingActionButton = {
-            if (!selectionMode) {                             // 🔹 on cache le FAB en mode sélection
+            if (!selectionMode) {
                 ExtendedFloatingActionButton(
                     onClick = { onAddExercise() },
-                    icon = { Icon(Icons.Default.Add, contentDescription = "Add Exercise")},
+                    icon = { Icon(Icons.Default.Add, contentDescription = "Add Exercise") },
                     text = { Text(text = "New Exercices") },
                 )
             }
@@ -46,7 +47,7 @@ fun ExercisesListPage(
                     onClick = {
                         val selected = uiState.exercises
                             .filter { selectedIds.contains(it.id) }
-                        onValidateSelection(selected)        // 🔹 renvoie la sélection à l’appelant
+                        onValidateSelection(selected)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -155,20 +156,39 @@ fun ExerciseItem(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-
-
+        Row(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            exercise.photoUri?.let { imageUri ->
-                Image(
-                    painter = rememberImagePainter(data = imageUri), // Charge l'image à partir de l'URI
-                    contentDescription = "Exercise Image",
-                    modifier = Modifier.size(80.dp), // Vous pouvez ajuster la taille de l'image selon vos besoins
-                    contentScale = ContentScale.Crop
-                )
+
+            // Affiche la photo si on a un chemin valide
+            exercise.photoUri?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = file),
+                        contentDescription = "Exercise Image",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
-            Text(text = exercise.name, style = MaterialTheme.typography.titleMedium)
+
+            Column {
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (!exercise.description.isNullOrEmpty()) {
+                    Text(
+                        text = exercise.description,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }
@@ -182,7 +202,8 @@ fun SelectableExerciseItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             checked = isSelected,
