@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
@@ -32,13 +34,10 @@ fun ExerciseCreationPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var series by remember { mutableStateOf("") }
     var reps by remember { mutableStateOf("") }
-
-    // Chemin de la photo sauvegardée dans le stockage interne
     var imagePath by remember { mutableStateOf<String?>(null) }
 
     // Launcher pour prendre une photo avec la caméra (retourne un Bitmap)
@@ -73,28 +72,40 @@ fun ExerciseCreationPage(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Exercise name") }
+            label = { Text("Exercise name") } ,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+
         )
 
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
             label = { Text("Description") },
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+
         )
 
         OutlinedTextField(
             value = series,
             onValueChange = { series = it },
             label = { Text("Series") },
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+
         )
 
         OutlinedTextField(
             value = reps,
             onValueChange = { reps = it },
             label = { Text("Repetitions") },
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+
         )
 
         // Bouton pour prendre une photo
