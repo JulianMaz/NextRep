@@ -5,8 +5,6 @@ EL ADHAL Mohamed
 ARAGO Paul
 MAZERAT Julian
 
-# NextRep
-
 Notre Application Android pour créer des exercices, organiser des séances et aussi enregistrer l’historique des entraînements. Le projet a respécté le patron architectural MVVP pour (Model - View - ViewModel) comme vu dans le cours.
 
 ---
@@ -15,20 +13,20 @@ Notre Application Android pour créer des exercices, organiser des séances et a
 
 - **Gestion des exercices**
   - Création d’un exercice (nom, description, séries, répétitions).
-  - Ajout d’une **photo** via la **caméra** (et/ou galerie selon version).
+  - Ajout d’une **photo** via la **caméra**.
   - Affichage de la photo dans la liste des exercices.
 
-- **Gestion des sessions (séances)**
+- **Gestion des sessions **
   - Création d’une session et sélection d’exercices existants.
   - Lancement d’un entraînement “Workout Live” basé sur une session.
 
 - **Entraînement**
   - **Workout Live (avec session)** : saisie des sets (kg, reps), ajout de sets, validation (checkbox Done), enregistrement en historique.
-  - **Free Workout (sans session)** : même logique mais avec une liste d’exercices sélectionnés.
+  - **Free Workout (sans session)** : même logique mais sans session mais avec une liste d'exo sélectionné.
 
 - **Historique**
-  - Historique par exercice : affichage des runs (chaque run = un timestamp) + sets associés.
-  - Aperçu “All Exercises History” : dernier run par exercice.
+  - Historique par exercice : affichage des runs (chaque run = une session) + sets associés.
+  - Aperçu “All Exercises History” : preview ==> dernier run par exercice.
 
 ---
 
@@ -49,7 +47,7 @@ Notre Application Android pour créer des exercices, organiser des séances et a
 - `com.example.nextrep.viewmodels`
   - ViewModels (la partie qui gére la gestion d'etat avec uistate et la separation de la logique) 
   - Exemples :
-    - `ExercisesViewModel.kt`
+    - `ExercisesViewModel.kt` [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt)
     - `SessionsViewModel.kt`
 
 - `com.example.nextrep.models.data`
