@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 
-// 🔹 1 set d’un exercice dans le workout live
 data class WorkoutSetState(
     val index: Int,             // 1, 2, 3…
     val weightKg: String = "",
@@ -13,7 +12,6 @@ data class WorkoutSetState(
     val done: Boolean = false
 )
 
-// 🔹 1 exercice dans le workout live
 data class WorkoutExerciseState(
     val id: Int,
     val name: String,
@@ -22,16 +20,14 @@ data class WorkoutExerciseState(
 
 class WorkoutViewModel : ViewModel() {
 
-    // 🔹 liste observable d’exercices dans la séance en cours
     private val _exercises = mutableStateListOf<WorkoutExerciseState>()
     val exercises: List<WorkoutExerciseState> get() = _exercises
 
-    // Appelée quand tu démarres une séance : tu transformes ta Session en état editable
     fun initFromSession(
         sessionId: Int,
-        exerciseNames: List<String>      // pour l’instant, juste les noms
+        exerciseNames: List<String>
     ) {
-        if (_exercises.isNotEmpty()) return  // éviter de réinitialiser si déjà remplie
+        if (_exercises.isNotEmpty()) return
 
         exerciseNames.forEachIndexed { idx, name ->
             val sets = mutableStateListOf<WorkoutSetState>()
@@ -53,7 +49,6 @@ class WorkoutViewModel : ViewModel() {
         }
     }
 
-    // 🔹 Mises à jour : ce sont ces fonctions que les TextField / Checkbox vont appeler
 
     fun updateWeight(exerciseIndex: Int, setIndex: Int, value: String) {
         val ex = _exercises[exerciseIndex]

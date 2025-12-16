@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 /**
- * Clé représentant UN run d'entraînement pour une session donnée.
+ * Clé représentant UN run d'entraînement pour une session donnée. à noter : ceci permet de grouper les sets
  */
 data class WorkoutInstanceKey(
     val sessionId: Int,
@@ -46,6 +46,7 @@ fun ExerciseHistoryPage(
     workoutHistoryRepository: WorkoutHistoryRepository,
     modifier: Modifier = Modifier
 ) {
+    // observation de l'etat des exercices
     val exercisesUiState by exercisesViewModel.uiState.collectAsState()
     val exercise = exercisesUiState.exercises.firstOrNull { it.id == exerciseId }
 
@@ -92,6 +93,7 @@ fun ExerciseHistoryPage(
         }
 
         // ===== CONTENU =====
+        // ici on affiche l'historique groupé par session + ordre chronoloqique
         if (groupedHistory.isEmpty()) {
             Text(
                 text = "Aucune séance enregistrée pour cet exercice pour l’instant.",
@@ -102,6 +104,7 @@ fun ExerciseHistoryPage(
                     .padding(top = 32.dp)
             )
         } else {
+            // si y'a des données, on les affiche
             val sortedEntries = groupedHistory.entries
                 .sortedByDescending { it.key.workoutTimestamp }
 
@@ -130,6 +133,7 @@ fun ExerciseHistoryPage(
     }
 }
 
+// ce composable affiche une card ou on affiche les infos d'une session, les sets réalisés pour l'exercice en question
 @Composable
 private fun SessionHistoryCard(
     sessionName: String,
@@ -159,7 +163,6 @@ private fun SessionHistoryCard(
                 fontWeight = FontWeight.SemiBold
             )
 
-            // ✅ فقط Run date/time
             Text(
                 text = "Run: $dateTimeText",
                 style = MaterialTheme.typography.bodyMedium, // + grand

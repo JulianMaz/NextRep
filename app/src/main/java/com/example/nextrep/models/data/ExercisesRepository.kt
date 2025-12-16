@@ -4,7 +4,6 @@ import com.example.nextrep.models.dao.ExerciseDao
 import com.example.nextrep.models.entity.toEntity
 import com.example.nextrep.models.entity.toModel
 
-// 🔹 Repository simple pour centraliser l’accès BD des exercices
 class ExercisesRepository(
     private val exerciseDao: ExerciseDao
 ) {
@@ -20,8 +19,4 @@ class ExercisesRepository(
         return exercise.copy(id = newId)
     }
 
-    // Suppression (si tu en as besoin plus tard)
-    suspend fun deleteExercise(exercise: Exercise) {
-        exerciseDao.deleteExercise(exercise.toEntity())
-    }
 }

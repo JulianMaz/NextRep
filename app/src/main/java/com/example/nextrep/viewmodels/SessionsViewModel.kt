@@ -1,7 +1,7 @@
 package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.example.nextrep.models.data.Exercise          // 🔹 Exercise pour la sélection
+import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.models.data.Session
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +11,7 @@ data class SessionsUiState(
     val sessions: List<Session> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val pendingExercisesForNewSession: List<Exercise> = emptyList()   // 🔹 exos choisis pour la prochaine session
+    val pendingExercisesForNewSession: List<Exercise> = emptyList()
 )
 
 open class SessionsViewModel : ViewModel() {
@@ -28,11 +28,11 @@ open class SessionsViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             sessions = updated,
             errorMessage = null,
-            pendingExercisesForNewSession = emptyList()     // 🔹 on nettoie la sélection
+            pendingExercisesForNewSession = emptyList()
         )
     }
 
-    fun setPendingExercisesForNewSession(exercises: List<Exercise>) { // 🔹 appelée depuis chooseExercises
+    fun setPendingExercisesForNewSession(exercises: List<Exercise>) {
         _uiState.value = _uiState.value.copy(
             pendingExercisesForNewSession = exercises
         )

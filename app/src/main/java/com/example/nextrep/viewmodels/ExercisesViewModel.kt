@@ -17,14 +17,14 @@ class ExercisesViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ExercisesUiState())
     val uiState: StateFlow<ExercisesUiState> = _uiState.asStateFlow()
 
-    private var nextId = 1   // 🔹 ID auto-incrémenté pour les exercices créés
+    private var nextId = 1
 
     fun addExercise(exercise: Exercise) {
-        val newExercise = exercise.copy(id = nextId++)   // 🔹 Ici on assigne un ID unique
+        val newExercise = exercise.copy(id = nextId++)
         val updated = _uiState.value.exercises + newExercise
 
         _uiState.value = _uiState.value.copy(
-            exercises = updated,                         // 🔹 Mise à jour de la liste
+            exercises = updated,
             errorMessage = null
         )
     }
@@ -38,14 +38,12 @@ class ExercisesViewModel : ViewModel() {
         return _uiState.value.exercises.firstOrNull { it.id == id }
     }
 
-    // 🔹 Pour initialiser depuis la base au démarrage
     fun setExercises(exercises: List<Exercise>) {
         _uiState.value = _uiState.value.copy(
             exercises = exercises
         )
     }
 
-    // 🔹 Pour ajouter un exo déjà “persisté” (avec son id) dans le state
     fun addExerciseLocal(exercise: Exercise) {
         _uiState.value = _uiState.value.copy(
             exercises = _uiState.value.exercises + exercise

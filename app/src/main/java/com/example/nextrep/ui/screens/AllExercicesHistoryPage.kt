@@ -35,6 +35,14 @@ import com.example.nextrep.models.entity.WorkoutSetEntity
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import kotlinx.coroutines.flow.map
 
+
+/* Ce composant affiche la liste de tous les exercices avec un aperçu de leur historique.
+et permet de cliquer pour voir l'historique complet d'un exercice.
+à noter: ce composant utilise ExercisesViewModel pour obtenir la liste des exercices.
+important: il ne faut PAS injecter un autre ViewModel ici !! */
+
+
+
 @Composable
 fun AllExercisesHistoryPage(
     exercisesViewModel: ExercisesViewModel = viewModel(),
@@ -43,11 +51,12 @@ fun AllExercisesHistoryPage(
 ) {
     val uiState by exercisesViewModel.uiState.collectAsState()
 
+
     Scaffold { innerPadding ->
         if (uiState.exercises.isEmpty()) {
             Text(
                 text = "Aucun exercice pour l’instant.",
-                style = MaterialTheme.typography.titleMedium, // ⬅️ plus gros
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxSize()
@@ -74,20 +83,24 @@ fun AllExercisesHistoryPage(
     }
 }
 
+// Affiche une preview de l'historique d'un exercice donné.
 @Composable
 private fun ExerciseHistoryPreviewItem(
     exercise: Exercise,
     workoutHistoryRepository: WorkoutHistoryRepository,
     onHistoryClick: () -> Unit
 ) {
+    // Récupère l'historique des sets pour un exo en question par odre chronologique
     val historyFlow = remember(exercise.id) {
         workoutHistoryRepository
             .getHistoryForExercise(exercise.id)
             .map { list -> list.groupBy { it.timestamp } }
     }
 
+// utilisation de collectAsState pour obtenir l'état actuel du flux pour l'historique
     val groupedByRun by historyFlow.collectAsState(initial = emptyMap<Long, List<WorkoutSetEntity>>())
 
+    // ici on extrait les sets de la dernière séance
     val lastRunSets: List<WorkoutSetEntity> = remember(groupedByRun) {
         if (groupedByRun.isEmpty()) {
             emptyList()
@@ -108,7 +121,7 @@ private fun ExerciseHistoryPreviewItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp) // ⬅️ un peu plus d’air
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -116,7 +129,7 @@ private fun ExerciseHistoryPreviewItem(
             ) {
                 Text(
                     text = exercise.name,
-                    style = MaterialTheme.typography.titleLarge, // ⬅️ plus gros
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )

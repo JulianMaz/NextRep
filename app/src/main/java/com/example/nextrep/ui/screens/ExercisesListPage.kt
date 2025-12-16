@@ -18,6 +18,17 @@ import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import java.io.File
 
+
+/*
+* Pour cette page elle fonctionne sous 2 modes :
+* 1- Mode normal : affiche la liste des exercices avec un bouton pour en ajouter
+* 2- Mode sélection : permet de sélectionner plusieurs exercices et de valider la sélection
+* ce mode est pertinant on va l'utiliser pour choisir des exercices lors de la création d'une session d'entraînement mais aussi lors de l'entrainment sans session
+* */
+
+// ici le OptIn est nécessaire pour utiliser Scaffold avec Material3
+// Expication de OptIn :  cette annotation permet d'utiliser des API expérimentales de Jetpack Compose Material3 pour bénéficier des dernières fonctionnalités de conception d'interface utilisateur.
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesListPage(
@@ -25,6 +36,8 @@ fun ExercisesListPage(
     onAddExercise: () -> Unit,
     onExerciseClick: (Int) -> Unit,
     selectionMode: Boolean = false,
+
+    // callback appelé quand on valide la sélection en mode sélection
     onValidateSelection: (List<Exercise>) -> Unit = {}
 ) {
     val uiState by exercisesViewModel.uiState.collectAsState()
@@ -33,6 +46,7 @@ fun ExercisesListPage(
 
     Scaffold(
         floatingActionButton = {
+            // n'affiche le bouton d'ajout que si on n'est pas en mode sélection
             if (!selectionMode) {
                 ExtendedFloatingActionButton(
                     onClick = { onAddExercise() },
@@ -42,6 +56,7 @@ fun ExercisesListPage(
             }
         },
         bottomBar = {
+            // si on est en mode selection l'affichage change pour permettre à l'utilisateur de choisir et valider ses choix
             if (selectionMode) {
                 Button(
                     onClick = {
@@ -78,6 +93,7 @@ fun ExercisesListPage(
     }
 }
 
+// ===== CONTENU DE LA LISTE D'EXERCICES =====
 @Composable
 fun ExerciseListContent(
     exercises: List<Exercise>,
@@ -111,6 +127,7 @@ fun ExerciseListContent(
     }
 }
 
+// ici c'est la page en mode sélection elle même que la précédente mais avec des checkbox pour sélectionner les exercices
 @Composable
 fun ExerciseListSelectableContent(
     exercises: List<Exercise>,
@@ -146,6 +163,9 @@ fun ExerciseListSelectableContent(
     }
 }
 
+
+//  tres important : onClick doit être passé depuis le parent pour gérer la navigation correctement
+// A ne pas oublier ! : l'affichage de l'image doit être lié à l'existence du fichier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseItem(
@@ -163,6 +183,7 @@ fun ExerciseItem(
         ) {
 
             // Affiche la photo si on a un chemin valide
+
             exercise.photoUri?.let { path ->
                 val file = File(path)
                 if (file.exists()) {
