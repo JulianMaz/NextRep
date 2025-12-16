@@ -29,23 +29,15 @@ import com.example.nextrep.R
 import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
 
+
+//page principale de l'application notre application avec le nv boutton pour démarrer une séance d'entraînement
 @Composable
 fun HomePage(
     onStartTraining: () -> Unit,
     onNewSessionClick: () -> Unit,
     onNewExerciseClick: () -> Unit,
     modifier: Modifier = Modifier,
-    exercisesViewModel: ExercisesViewModel = viewModel() // 🔹 pour récupérer les exos
 ) {
-    // 🔹 Observe la liste des exercices existants
-    val exercisesUiState by exercisesViewModel.uiState.collectAsState()
-    val allExercises = exercisesUiState.exercises
-
-    // 🔹 On prend simplement les 3 derniers exercices ajoutés
-    val topExercises: List<Exercise> = remember(allExercises) {
-        if (allExercises.size <= 3) allExercises
-        else allExercises.takeLast(3)
-    }
 
     val quoteOfTheDay = remember {
         val quotes = listOf(
@@ -64,7 +56,6 @@ fun HomePage(
         modifier = modifier
             .fillMaxSize()
     ) {
-        // ===== CONTENU PRINCIPAL SCROLLABLE =====
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -74,7 +65,6 @@ fun HomePage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ===== IMAGE HERO =====
             HeroImageCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,7 +72,6 @@ fun HomePage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ===== QUOTE DU JOUR =====
             QuoteCard(
                 quote = quoteOfTheDay,
                 modifier = Modifier.fillMaxWidth()
@@ -94,7 +83,6 @@ fun HomePage(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ===== 2 BOUTONS : NEW SESSION / NEW EXERCISE =====
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -120,7 +108,6 @@ fun HomePage(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // ===== START TRAINING FIXÉ EN BAS =====
         ExtendedFloatingActionButton(
             onClick = { onStartTraining() },
             icon = { Icon(Icons.Default.Add, contentDescription = "Start Training") },
@@ -133,9 +120,7 @@ fun HomePage(
     }
 }
 
-// --------------------------------------------------------
-//  Sous-composants
-// --------------------------------------------------------
+
 
 @Composable
 private fun HeroImageCard(

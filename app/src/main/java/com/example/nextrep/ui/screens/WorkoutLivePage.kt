@@ -30,7 +30,6 @@ import com.example.nextrep.models.entity.WorkoutSetEntity
 import com.example.nextrep.viewmodels.SessionsViewModel
 import kotlinx.coroutines.delay
 
-// 🔹 Représente l'état d'une ligne de set pour un exercice
 data class SetRowState(
     val index: Int,
     val weightKg: String = "",
@@ -55,20 +54,14 @@ fun WorkoutLivePage(
     onAddExercisesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 🔹 Récupère la session en cours
+    // Récupère la session en cours
     val session = sessionsViewModel.getSessionById(sessionId)
 
-    // 🔹 Timer en secondes depuis l'ouverture de la page
     var elapsedSeconds by remember { mutableIntStateOf(0) }
-
-
-    // 🔹 Nombre total de sets complétés (toutes les ✓)
     var totalCompletedSets by remember { mutableIntStateOf(0) }
-
-    // 🔹 Map des sets par exercice : exerciseId -> List<SetRowState>
     var exerciseSets by remember { mutableStateOf<Map<Int, List<SetRowState>>>(emptyMap()) }
 
-    // 🔹 Démarrage automatique du timer à l'ouverture
+// ici on demmarre automatiquement le timer
     LaunchedEffect(Unit) {
         while (true) {
             delay(1_000L)
@@ -76,7 +69,6 @@ fun WorkoutLivePage(
         }
     }
 
-    // 🔹 Cas où la session ne serait pas trouvée (sécurité)
     if (session == null) {
         Box(
             modifier = modifier
@@ -98,7 +90,6 @@ fun WorkoutLivePage(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // ===== HEADER LIVE (session name + Finish on a row) =====
         HeaderLiveSection(
             sessionName = session.name,
             onFinishWorkout = {
@@ -112,7 +103,6 @@ fun WorkoutLivePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ===== STATS CARD =====
         StatsCard(
             elapsedSeconds = elapsedSeconds,
             totalCompletedSets = totalCompletedSets
@@ -120,7 +110,7 @@ fun WorkoutLivePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ===== LISTE D'EXERCICES =====
+        // ===== ==========================  LiSte D'EXERCICES =====
         if (session.exercises.isEmpty()) {
             NoExercisesSection(onAddExercisesClick = onAddExercisesClick)
         } else {
@@ -141,11 +131,9 @@ fun WorkoutLivePage(
                         exercise = exercise,
                         sets = setsForExercise,
                         onSetsChanged = { updatedList ->
-                            // 🔹 met à jour la map globale
                             exerciseSets = exerciseSets.toMutableMap().apply {
                                 put(exercise.id, updatedList)
                             }
-                            // 🔹 recalcule le nombre total de sets complétés
                             totalCompletedSets = exerciseSets
                                 .values
                                 .flatten()
@@ -162,9 +150,6 @@ fun WorkoutLivePage(
     }
 }
 
-// -------------------------------------------
-//  Sous-composants de WorkoutLivePage
-// -------------------------------------------
 
 @Composable
 private fun HeaderLiveSection(
@@ -308,7 +293,6 @@ private fun ExerciseLiveBlock(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // ----- En-tête exercice -----
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
@@ -343,7 +327,6 @@ private fun ExerciseLiveBlock(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ----- Table des sets -----
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

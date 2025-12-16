@@ -23,7 +23,6 @@ import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.models.entity.WorkoutSetEntity
 import kotlinx.coroutines.delay
 
-// 🔹 Représente l'état d'une ligne de set pour un exercice
 data class FreeSetRowState(
     val index: Int,
     val weightKg: String = "",
@@ -42,17 +41,10 @@ fun FreeWorkoutPage(
     onAddExercisesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 🔹 Timer en secondes depuis l'ouverture de la page
     var elapsedSeconds by remember { mutableIntStateOf(0) }
-
-
-    // 🔹 Nombre total de sets complétés (toutes les ✓)
     var totalCompletedSets by remember { mutableIntStateOf(0) }
-
-    // 🔹 Map des sets par exercice : exerciseId -> List<FreeSetRowState>
     var exerciseSets by remember { mutableStateOf<Map<Int, List<FreeSetRowState>>>(emptyMap()) }
 
-    // 🔹 Démarrage automatique du timer à l'ouverture
     LaunchedEffect(Unit) {
         while (true) {
             delay(1_000L)
@@ -65,7 +57,6 @@ fun FreeWorkoutPage(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // ===== HEADER LIVE =====
         FreeHeaderLiveSection(
             elapsedSeconds = elapsedSeconds,
             onFinishWorkout = { val completedSets = buildCompletedWorkoutSets(
@@ -78,7 +69,6 @@ fun FreeWorkoutPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ===== STATS CARD =====
         FreeStatsCard(
             elapsedSeconds = elapsedSeconds,
             totalCompletedSets = totalCompletedSets
@@ -86,9 +76,7 @@ fun FreeWorkoutPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ===== LISTE D'EXERCICES =====
         if (selectedExercises.isEmpty()) {
-            // 🔹 Aucun exercice : invite à en ajouter
             FreeNoExercisesSection(
                 onAddExercisesClick = onAddExercisesClick
             )
@@ -98,7 +86,6 @@ fun FreeWorkoutPage(
                     .weight(1f)
             ) {
                 items(selectedExercises, key = { it.id }) { exercise ->
-                    // Source of truth: exerciseSets in the parent (persists while scrolling)
                     val setsForExercise = exerciseSets[exercise.id]
                         ?: initialFreeSetsForExercise(exercise).also { initial ->
                             exerciseSets = exerciseSets.toMutableMap().apply {
@@ -113,7 +100,6 @@ fun FreeWorkoutPage(
                             exerciseSets = exerciseSets.toMutableMap().apply {
                                 put(exercise.id, updatedSets)
                             }
-                            // Recalculate to avoid drift/double-count when recomposing
                             totalCompletedSets = exerciseSets.values.flatten().count { it.isCompleted }
                         }
                     )
@@ -128,13 +114,11 @@ fun FreeWorkoutPage(
     }
 }
 
-// -------------------------------------------------------
-//  Sous-composants Free Workout
-// -------------------------------------------------------
+
 
 @Composable
 private fun FreeHeaderLiveSection(
-    elapsedSeconds: Int, // conservé si tu en as encore besoin ailleurs
+    elapsedSeconds: Int,
     onFinishWorkout: () -> Unit
 ) {
     Row(

@@ -20,17 +20,37 @@ import com.example.nextrep.models.data.Session
 import com.example.nextrep.viewmodels.SessionsUiState
 import com.example.nextrep.viewmodels.SessionsViewModel
 
+/**
+ * Écran de création d'une session d'entraînement.
+ *
+ * Cet écran permet à l'utilisateur :
+ * - de saisir les informations de base d'une session,
+ * - de sélectionner une liste d'exercices existants,
+ * - de sauvegarder la session complète.
+ *
+ * La logique métier (création et stockage de la session) est déléguée
+ * au [SessionsViewModel], conformément à l'architecture MVVM.
+ *
+ * @param sessionsViewModel ViewModel responsable de la gestion des sessions.
+ * @param uiState État UI contenant notamment les exercices sélectionnés
+ * @param onChooseExercises Callback déclenchant la navigation vers
+ * l'écran de sélection des exercices.
+ * @param onSessionCreated Callback appelé après la création réussie
+ * de la session (navigation retour).
+ */
 @Composable
 fun SessionCreationPage(
     sessionsViewModel: SessionsViewModel,
-    uiState: SessionsUiState,                           // 🔹 on lit pendingExercisesForNewSession ici
-    onChooseExercises: () -> Unit,                      // 🔹 nav vers la liste des exos (mode sélection)
+    uiState: SessionsUiState,
+    onChooseExercises: () -> Unit,
     onSessionCreated: () -> Unit
 ) {
+    // Champs persistants (survivent aux recompositions)
     var name by rememberSaveable { mutableStateOf("") }
     var date by rememberSaveable { mutableStateOf("") }
 
-    val selectedExercises = uiState.pendingExercisesForNewSession   // 🔹 exos choisis pour cette session
+    // Liste temporaire des exercices sélectionnés pour la session
+    val selectedExercises = uiState.pendingExercisesForNewSession
 
     Column(
         modifier = Modifier
@@ -56,7 +76,7 @@ fun SessionCreationPage(
         Divider(modifier = Modifier.padding(vertical = 16.dp))
 
         Button(
-            onClick = onChooseExercises,                 // 🔹 ouvre ExercisesListPage en mode sélection
+            onClick = onChooseExercises,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Choisir des exercices")
@@ -68,11 +88,10 @@ fun SessionCreationPage(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
 
-            // 🔹 Liste scrollable qui prend l’espace restant, pas de verticalScroll parent
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)                         // 🔹 utilise l’espace restant de la colonne
+                    .weight(1f)
             ) {
                 items(selectedExercises) { exo ->
                     Text(
@@ -88,13 +107,13 @@ fun SessionCreationPage(
         Button(
             onClick = {
                 val newSession = Session(
-                    id = 0,                               // 🔹 sera remplacé dans SessionsViewModel
+                    id = 0,
                     name = name,
                     date = date,
-                    exercises = selectedExercises        // 🔹 exos effectivement choisis
+                    exercises = selectedExercises
                 )
-                sessionsViewModel.addSession(newSession) // 🔹 met à jour uiState.sessions
-                onSessionCreated()                       // 🔹 nav vers SessionsListPage
+                sessionsViewModel.addSession(newSession)
+                onSessionCreated()
             },
             modifier = Modifier
                 .fillMaxWidth()

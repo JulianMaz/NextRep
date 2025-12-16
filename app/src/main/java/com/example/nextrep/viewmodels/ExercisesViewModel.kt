@@ -19,25 +19,6 @@ class ExercisesViewModel : ViewModel() {
 
     private var nextId = 1
 
-    fun addExercise(exercise: Exercise) {
-        val newExercise = exercise.copy(id = nextId++)
-        val updated = _uiState.value.exercises + newExercise
-
-        _uiState.value = _uiState.value.copy(
-            exercises = updated,
-            errorMessage = null
-        )
-    }
-
-    fun deleteExercise(exerciseId: Int) {
-        val updated = _uiState.value.exercises.filterNot { it.id == exerciseId }
-        _uiState.value = _uiState.value.copy(exercises = updated)
-    }
-
-    fun getExerciseById(id: Int): Exercise? {
-        return _uiState.value.exercises.firstOrNull { it.id == id }
-    }
-
     fun setExercises(exercises: List<Exercise>) {
         _uiState.value = _uiState.value.copy(
             exercises = exercises

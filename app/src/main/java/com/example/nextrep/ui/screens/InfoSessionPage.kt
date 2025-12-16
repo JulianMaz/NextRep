@@ -20,13 +20,13 @@ import com.example.nextrep.viewmodels.SessionsViewModel
 
 @Composable
 fun InfoSessionPage(
-    sessionId: Int,                           // 🔹 l'ID de la session à afficher
-    sessionsViewModel: SessionsViewModel,     // 🔹 ViewModel partagé des sessions
+    sessionId: Int,
+    sessionsViewModel: SessionsViewModel,
     onExerciseAdded: () -> Unit,
     onStartWorkout: (Int) -> Unit,
     onFinishWorkout: () -> Unit
 ) {
-    val uiState by sessionsViewModel.uiState.collectAsState()      // 🔹 on observe les sessions
+    val uiState by sessionsViewModel.uiState.collectAsState()
     val session = uiState.sessions.firstOrNull { it.id == sessionId }
 
     if (session == null) {
@@ -46,7 +46,6 @@ fun InfoSessionPage(
             .padding(16.dp)
     ) {
 
-        // 🔹 Infos de base de la session
         Text(
             text = session.name,
             style = MaterialTheme.typography.headlineMedium
@@ -59,7 +58,6 @@ fun InfoSessionPage(
 
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-        // 🔹 Liste des exercices de cette session
         Text(
             text = "Exercises in this session:",
             style = MaterialTheme.typography.titleMedium

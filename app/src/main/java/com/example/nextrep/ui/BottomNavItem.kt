@@ -14,25 +14,24 @@ data class BottomNavItem(
     val icon: ImageVector
 )
 
-// 🔹 Items de la bottom bar
 val bottomNavItems = listOf(
     BottomNavItem(
-        route = NextRepScreen.HomePage.name,          // 🔴 IMPORTANT : route EXACTEMENT identique
+        route = NextRepScreen.HomePage.name,
         label = "Home",
         icon = Icons.Filled.Home
     ),
     BottomNavItem(
-        route = NextRepScreen.SessionsListPage.name,  // 🔴 idem
+        route = NextRepScreen.SessionsListPage.name,
         label = "Sessions",
         icon = Icons.Filled.List
     ),
     BottomNavItem(
-        route = NextRepScreen.ExercisesListPage.name, // 🔴 idem
+        route = NextRepScreen.ExercisesListPage.name,
         label = "Exercises",
         icon = Icons.Filled.FitnessCenter
     ),
     BottomNavItem(
-        route = NextRepScreen.AllExercisesHistoryPage.name,  // 🔴 onglet History
+        route = NextRepScreen.AllExercisesHistoryPage.name,
         label = "History",
         icon = Icons.Filled.History
     )

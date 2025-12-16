@@ -38,11 +38,6 @@ open class SessionsViewModel : ViewModel() {
         )
     }
 
-    fun deleteSession(sessionId: Int) {
-        val updated = _uiState.value.sessions.filterNot { it.id == sessionId }
-        _uiState.value = _uiState.value.copy(sessions = updated)
-    }
-
     open fun getSessionById(sessionId: Int): Session? {
         return _uiState.value.sessions.firstOrNull { it.id == sessionId }
     }
