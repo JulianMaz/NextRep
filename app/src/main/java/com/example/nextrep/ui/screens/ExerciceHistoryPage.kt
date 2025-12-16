@@ -2,14 +2,15 @@ package com.example.nextrep.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,9 +31,6 @@ import java.util.Locale
 
 /**
  * Clé représentant UN run d'entraînement pour une session donnée.
- *
- * Même session refaite plusieurs fois -> plusieurs clés différentes
- * grâce au timestamp utilisé lors de l’enregistrement des sets.
  */
 data class WorkoutInstanceKey(
     val sessionId: Int,
@@ -48,12 +46,9 @@ fun ExerciseHistoryPage(
     workoutHistoryRepository: WorkoutHistoryRepository,
     modifier: Modifier = Modifier
 ) {
-    // 🔹 Récupérer les infos de l'exercice (nom, description)
     val exercisesUiState by exercisesViewModel.uiState.collectAsState()
     val exercise = exercisesUiState.exercises.firstOrNull { it.id == exerciseId }
 
-    // 🔹 Récupérer l'historique des sets pour cet exercice,
-    // puis regrouper par "run" (sessionId + timestamp)
     val historyFlow = remember(exerciseId) {
         workoutHistoryRepository
             .getHistoryForExercise(exerciseId)
@@ -79,7 +74,7 @@ fun ExerciseHistoryPage(
         // ===== HEADER EXERCICE =====
         Text(
             text = exercise?.name ?: "Exercise history",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium, // + grand
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
@@ -89,7 +84,7 @@ fun ExerciseHistoryPage(
         if (exercise?.description?.isNotBlank() == true) {
             Text(
                 text = exercise.description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge, // + grand
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -100,14 +95,13 @@ fun ExerciseHistoryPage(
         if (groupedHistory.isEmpty()) {
             Text(
                 text = "Aucune séance enregistrée pour cet exercice pour l’instant.",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge, // + grand
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp)
             )
         } else {
-            // 🔹 On trie les runs de la plus récente à la plus ancienne
             val sortedEntries = groupedHistory.entries
                 .sortedByDescending { it.key.workoutTimestamp }
 
@@ -118,21 +112,18 @@ fun ExerciseHistoryPage(
             ) {
                 items(
                     items = sortedEntries,
-                    key = { entry ->
-                        "${entry.key.sessionId}-${entry.key.workoutTimestamp}"
-                    }
+                    key = { entry -> "${entry.key.sessionId}-${entry.key.workoutTimestamp}" }
                 ) { entry ->
                     val key = entry.key
                     val sets = entry.value
 
                     SessionHistoryCard(
                         sessionName = key.sessionName,
-                        sessionDate = key.sessionDate,
                         workoutTimestamp = key.workoutTimestamp,
                         sets = sets
                     )
 
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
@@ -142,7 +133,6 @@ fun ExerciseHistoryPage(
 @Composable
 private fun SessionHistoryCard(
     sessionName: String,
-    sessionDate: String,
     workoutTimestamp: Long,
     sets: List<WorkoutSetEntity>
 ) {
@@ -163,25 +153,23 @@ private fun SessionHistoryCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // 🔹 Titre : nom de la session
             Text(
                 text = sessionName,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge, // + grand
                 fontWeight = FontWeight.SemiBold
             )
 
-            // 🔹 Sous-titre : date de la session + horodatage du run
+            // ✅ فقط Run date/time
             Text(
-                text = "Session date: $sessionDate – Run: $dateTimeText",
-                style = MaterialTheme.typography.bodySmall,
+                text = "Run: $dateTimeText",
+                style = MaterialTheme.typography.bodyMedium, // + grand
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // 🔹 Liste des sets de CE run UNIQUEMENT
             sets.sortedBy { it.setIndex }.forEach { set ->
                 Text(
                     text = "Set ${set.setIndex}: ${set.weightKg} kg x ${set.reps}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyLarge // + grand
                 )
             }
         }
