@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Exercise
-import com.example.nextrep.models.WorkoutSetEntity
+import com.example.nextrep.models.data.Exercise
+import com.example.nextrep.models.entity.WorkoutSetEntity
+import kotlinx.coroutines.delay
 
 // 🔹 Représente l'état d'une ligne de set pour un exercice
 data class FreeSetRowState(
     val index: Int,
-    val previousKg: String = "-",
     val weightKg: String = "",
     val reps: String = "",
     val isCompleted: Boolean = false
@@ -45,8 +45,6 @@ fun FreeWorkoutPage(
     // 🔹 Timer en secondes depuis l'ouverture de la page
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
-    // 🔹 Volume manuel (en kg) saisi par l'utilisateur
-    var manualVolumeKg by remember { mutableStateOf("0") }
 
     // 🔹 Nombre total de sets complétés (toutes les ✓)
     var totalCompletedSets by remember { mutableIntStateOf(0) }
@@ -57,7 +55,7 @@ fun FreeWorkoutPage(
     // 🔹 Démarrage automatique du timer à l'ouverture
     LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(1_000L)
+            delay(1_000L)
             elapsedSeconds += 1
         }
     }
@@ -83,8 +81,6 @@ fun FreeWorkoutPage(
         // ===== STATS CARD =====
         FreeStatsCard(
             elapsedSeconds = elapsedSeconds,
-            manualVolumeKg = manualVolumeKg,
-            onManualVolumeChange = { manualVolumeKg = it },
             totalCompletedSets = totalCompletedSets
         )
 
@@ -102,19 +98,23 @@ fun FreeWorkoutPage(
                     .weight(1f)
             ) {
                 items(selectedExercises, key = { it.id }) { exercise ->
+                    // Source of truth: exerciseSets in the parent (persists while scrolling)
+                    val setsForExercise = exerciseSets[exercise.id]
+                        ?: initialFreeSetsForExercise(exercise).also { initial ->
+                            exerciseSets = exerciseSets.toMutableMap().apply {
+                                put(exercise.id, initial)
+                            }
+                        }
+
                     FreeExerciseLiveBlock(
                         exercise = exercise,
-                        onSetsChanged = { setsForExercise ->
+                        sets = setsForExercise,
+                        onSetsChanged = { updatedSets ->
                             exerciseSets = exerciseSets.toMutableMap().apply {
-                                put(exercise.id, setsForExercise)
+                                put(exercise.id, updatedSets)
                             }
-                        },
-                        onSetCompletedChanged = { completed ->
-                            if (completed) {
-                                totalCompletedSets += 1
-                            } else {
-                                totalCompletedSets = (totalCompletedSets - 1).coerceAtLeast(0)
-                            }
+                            // Recalculate to avoid drift/double-count when recomposing
+                            totalCompletedSets = exerciseSets.values.flatten().count { it.isCompleted }
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -134,51 +134,40 @@ fun FreeWorkoutPage(
 
 @Composable
 private fun FreeHeaderLiveSection(
-    elapsedSeconds: Int,
+    elapsedSeconds: Int, // conservé si tu en as encore besoin ailleurs
     onFinishWorkout: () -> Unit
 ) {
-    val formattedTimer = formatDuration(elapsedSeconds)
-
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        // 🔹 Titre fixe
         Text(
-            text = formattedTimer,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            text = "Free Workout",
+            style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            TextButton(
-                onClick = onFinishWorkout,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = MaterialTheme.shapes.large
-                    )
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = "Finish",
-                    color = MaterialTheme.colorScheme.onPrimary
+        // 🔹 Bouton Finish
+        TextButton(
+            onClick = onFinishWorkout,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.large
                 )
-            }
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = "Finish",
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
-
 @Composable
 private fun FreeStatsCard(
     elapsedSeconds: Int,
-    manualVolumeKg: String,
-    onManualVolumeChange: (String) -> Unit,
     totalCompletedSets: Int
 ) {
     val formattedDuration = formatDuration(elapsedSeconds)
@@ -190,43 +179,27 @@ private fun FreeStatsCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // ⏱ Duration (centré)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
             ) {
                 FreeStatItem(
                     label = "Duration",
                     value = formattedDuration
                 )
+            }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Volume",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    OutlinedTextField(
-                        value = manualVolumeKg,
-                        onValueChange = onManualVolumeChange,
-                        singleLine = true,
-                        modifier = Modifier
-                            .width(80.dp)
-                            .padding(top = 4.dp),
-                        textStyle = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "kg",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-
+            // 🧮 Sets (centré)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
                 FreeStatItem(
                     label = "Sets",
                     value = totalCompletedSets.toString()
@@ -290,19 +263,9 @@ private fun FreeNoExercisesSection(
 @Composable
 private fun FreeExerciseLiveBlock(
     exercise: Exercise,
-    onSetsChanged: (List<FreeSetRowState>) -> Unit,
-    onSetCompletedChanged: (Boolean) -> Unit
+    sets: List<FreeSetRowState>,
+    onSetsChanged: (List<FreeSetRowState>) -> Unit
 ) {
-    var sets by remember {
-        mutableStateOf(
-            listOf(
-                FreeSetRowState(index = 1),
-                FreeSetRowState(index = 2),
-                FreeSetRowState(index = 3)
-            )
-        )
-    }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -357,11 +320,10 @@ private fun FreeExerciseLiveBlock(
                     .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("SET", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
-                Text("PREVIOUS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("KG", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("REPS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("Done", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
+                Text("SET", Modifier.weight(0.9f), style = MaterialTheme.typography.labelSmall)
+                Text("KG", Modifier.weight(1.1f), style = MaterialTheme.typography.labelSmall)
+                Text("REPS", Modifier.weight(1.1f), style = MaterialTheme.typography.labelSmall)
+                Text("Done", Modifier.weight(0.9f), style = MaterialTheme.typography.labelSmall)
             }
 
             Divider(modifier = Modifier.padding(vertical = 4.dp))
@@ -370,13 +332,12 @@ private fun FreeExerciseLiveBlock(
                 FreeSetRow(
                     setRow = setRow,
                     onValueChange = { updated ->
-                        sets = sets.map { if (it.index == updated.index) updated else it }
-                        onSetsChanged(sets)
+                        val newList = sets.map { if (it.index == updated.index) updated else it }
+                        onSetsChanged(newList)
                     },
-                    onCompletedToggle = { updated, newlyCompleted ->
-                        sets = sets.map { if (it.index == updated.index) updated else it }
-                        onSetsChanged(sets)
-                        onSetCompletedChanged(newlyCompleted)
+                    onCompletedToggle = { updated ->
+                        val newList = sets.map { if (it.index == updated.index) updated else it }
+                        onSetsChanged(newList)
                     }
                 )
             }
@@ -386,8 +347,13 @@ private fun FreeExerciseLiveBlock(
             TextButton(
                 onClick = {
                     val nextIndex = (sets.maxOfOrNull { it.index } ?: 0) + 1
-                    sets = sets + FreeSetRowState(index = nextIndex)
-                    onSetsChanged(sets)
+                    val defaultReps = if (exercise.repetitions > 0) exercise.repetitions.toString() else ""
+                    val newList = sets + FreeSetRowState(
+                        index = nextIndex,
+                        weightKg = "10",
+                        reps = defaultReps
+                    )
+                    onSetsChanged(newList)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -401,59 +367,48 @@ private fun FreeExerciseLiveBlock(
 private fun FreeSetRow(
     setRow: FreeSetRowState,
     onValueChange: (FreeSetRowState) -> Unit,
-    onCompletedToggle: (FreeSetRowState, Boolean) -> Unit
+    onCompletedToggle: (FreeSetRowState) -> Unit
 ) {
-    var weight by remember(setRow.index) { mutableStateOf(setRow.weightKg) }
-    var reps by remember(setRow.index) { mutableStateOf(setRow.reps) }
-    var isCompleted by remember(setRow.index) { mutableStateOf(setRow.isCompleted) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(setRow.index.toString(), Modifier.weight(0.8f))
-
-        Text(setRow.previousKg, Modifier.weight(1f))
+        Text(setRow.index.toString(), Modifier.weight(0.9f))
 
         OutlinedTextField(
-            value = weight,
-            onValueChange = {
-                weight = it
-                onValueChange(setRow.copy(weightKg = it, reps = reps, isCompleted = isCompleted))
+            value = setRow.weightKg,
+            onValueChange = { newValue ->
+                onValueChange(setRow.copy(weightKg = newValue))
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .padding(horizontal = 4.dp),
             singleLine = true
         )
 
         OutlinedTextField(
-            value = reps,
-            onValueChange = {
-                reps = it
-                onValueChange(setRow.copy(weightKg = weight, reps = it, isCompleted = isCompleted))
+            value = setRow.reps,
+            onValueChange = { newValue ->
+                onValueChange(setRow.copy(reps = newValue))
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .padding(horizontal = 4.dp),
             singleLine = true
         )
 
         Checkbox(
-            checked = isCompleted,
+            checked = setRow.isCompleted,
             onCheckedChange = { checked ->
-                isCompleted = checked
-                onCompletedToggle(
-                    setRow.copy(weightKg = weight, reps = reps, isCompleted = checked),
-                    checked
-                )
+                onCompletedToggle(setRow.copy(isCompleted = checked))
             },
-            modifier = Modifier.weight(0.8f)
+            modifier = Modifier.weight(0.9f)
         )
     }
 }
+
 
 /**
  * Construit la liste des WorkoutSetEntity à partir :
@@ -506,5 +461,15 @@ private fun formatDuration(totalSeconds: Int): String {
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
-private fun List<FreeSetRowState>.notEmptyOrFalse(): Boolean =
-    this.isNotEmpty() && this.all { it.isCompleted }
+private fun initialFreeSetsForExercise(exercise: Exercise): List<FreeSetRowState> {
+    val count = exercise.series.takeIf { it > 0 } ?: 3
+    val defaultReps = if (exercise.repetitions > 0) exercise.repetitions.toString() else ""
+
+    return (1..count).map { idx ->
+        FreeSetRowState(
+            index = idx,
+            weightKg = "10",
+            reps = defaultReps
+        )
+    }
+}

@@ -1,6 +1,8 @@
-package com.example.nextrep.models
+package com.example.nextrep.models.data
 
-import com.example.nextrep.data.ExerciseDao
+import com.example.nextrep.models.dao.ExerciseDao
+import com.example.nextrep.models.entity.toEntity
+import com.example.nextrep.models.entity.toModel
 
 // 🔹 Repository simple pour centraliser l’accès BD des exercices
 class ExercisesRepository(

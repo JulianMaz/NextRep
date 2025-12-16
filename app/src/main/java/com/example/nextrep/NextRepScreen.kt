@@ -1,9 +1,9 @@
 package com.example.nextrep
 
-import com.example.nextrep.models.ExercisesRepository
+import com.example.nextrep.models.data.ExercisesRepository
 import androidx.room.Room
 import androidx.compose.ui.platform.LocalContext
-import com.example.nextrep.data.NextRepDatabase
+import com.example.nextrep.models.data.NextRepDatabase
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
@@ -37,13 +37,13 @@ import com.example.nextrep.ui.screens.SessionCreationPage
 import com.example.nextrep.ui.screens.SessionsListPage
 import com.example.nextrep.ui.screens.SettingsPage
 import androidx.navigation.NavDestination.Companion.hierarchy
-import com.example.nextrep.models.Session
+import com.example.nextrep.models.data.Session
 import com.example.nextrep.ui.components.NextRepTopBar
 import com.example.nextrep.ui.screens.WorkoutLivePage
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import com.example.nextrep.viewmodels.SessionsViewModel
-import com.example.nextrep.models.WorkoutHistoryRepository
-import com.example.nextrep.models.WorkoutSetEntity
+import com.example.nextrep.models.data.WorkoutHistoryRepository
+import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.ui.screens.ExerciseHistoryPage
 import com.example.nextrep.ui.screens.AllExercisesHistoryPage
 import com.example.nextrep.ui.screens.ExerciseInfoPage
@@ -123,18 +123,6 @@ fun NextRepApp(
         topBar = {
             if (showTopBar) {
                 NextRepTopBar(
-                    onSettingsClick = {
-                        navController.navigate(NextRepScreen.SettingsPage.name)
-                    },
-                    onHomeClick = {
-                        navController.navigate(NextRepScreen.HomePage.name) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
                 )
             }
         },
@@ -398,7 +386,6 @@ fun NextRepApp(
                     onExerciseClick = { },
                     selectionMode = true,
                     onValidateSelection = { selectedExercises ->
-                        // TODO : mettre à jour la session / workout live si tu veux
                         navController.popBackStack()
                     }
                 )
@@ -462,7 +449,7 @@ fun NextRepApp(
                 val selectedExercises =
                     navController.currentBackStackEntry
                         ?.savedStateHandle
-                        ?.get<List<com.example.nextrep.models.Exercise>>("freeWorkoutSelectedExercises")
+                        ?.get<List<Exercise>>("freeWorkoutSelectedExercises")
                         ?: emptyList()
 
                 FreeWorkoutPage(

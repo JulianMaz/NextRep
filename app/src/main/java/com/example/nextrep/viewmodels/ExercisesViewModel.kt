@@ -1,7 +1,7 @@
 package com.example.nextrep.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.data.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

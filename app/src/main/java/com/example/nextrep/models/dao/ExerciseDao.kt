@@ -1,10 +1,10 @@
-package com.example.nextrep.data
+package com.example.nextrep.models.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Delete
-import com.example.nextrep.models.ExerciseEntity
+import com.example.nextrep.models.entity.ExerciseEntity
 
 @Dao
 interface ExerciseDao {

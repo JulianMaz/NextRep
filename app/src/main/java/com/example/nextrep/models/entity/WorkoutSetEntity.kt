@@ -1,4 +1,4 @@
-package com.example.nextrep.models
+package com.example.nextrep.models.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

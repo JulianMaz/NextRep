@@ -1,7 +1,8 @@
-package com.example.nextrep.models
+package com.example.nextrep.models.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.nextrep.models.data.Exercise
 
 // 🔹 Entity Room pour la table des exercices
 @Entity(tableName = "exercises")

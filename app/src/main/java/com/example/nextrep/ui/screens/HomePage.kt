@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nextrep.R
-import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
 
 @Composable

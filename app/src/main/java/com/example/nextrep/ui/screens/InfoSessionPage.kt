@@ -15,7 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.viewmodels.SessionsViewModel
 
 @Composable

@@ -1,6 +1,7 @@
-package com.example.nextrep.models
+package com.example.nextrep.models.data
 
-import com.example.nextrep.data.WorkoutSetDao
+import com.example.nextrep.models.dao.WorkoutSetDao
+import com.example.nextrep.models.entity.WorkoutSetEntity
 import kotlinx.coroutines.flow.Flow
 
 class WorkoutHistoryRepository(

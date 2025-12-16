@@ -1,4 +1,4 @@
-package com.example.nextrep.models
+package com.example.nextrep.models.data
 
 // ce fichier est responsable la data structure de l'app
 

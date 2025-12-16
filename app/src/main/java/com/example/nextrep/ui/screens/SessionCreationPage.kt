@@ -16,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.nextrep.models.Session
+import com.example.nextrep.models.data.Session
 import com.example.nextrep.viewmodels.SessionsUiState
 import com.example.nextrep.viewmodels.SessionsViewModel
 

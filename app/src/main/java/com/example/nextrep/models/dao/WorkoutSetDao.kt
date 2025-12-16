@@ -1,16 +1,16 @@
-package com.example.nextrep.data
+package com.example.nextrep.models.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.nextrep.models.WorkoutSetEntity
+import com.example.nextrep.models.entity.WorkoutSetEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutSetDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insertAll(sets: List<WorkoutSetEntity>)
 
     @Query("""

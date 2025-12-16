@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.layout.ContentScale
-import com.example.nextrep.models.Exercise
+import com.example.nextrep.models.data.Exercise
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import java.io.File
 

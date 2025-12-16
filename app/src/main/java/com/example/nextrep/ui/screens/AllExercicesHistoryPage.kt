@@ -29,9 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.nextrep.models.Exercise
-import com.example.nextrep.models.WorkoutHistoryRepository
-import com.example.nextrep.models.WorkoutSetEntity
+import com.example.nextrep.models.data.Exercise
+import com.example.nextrep.models.data.WorkoutHistoryRepository
+import com.example.nextrep.models.entity.WorkoutSetEntity
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import kotlinx.coroutines.flow.map
 

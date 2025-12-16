@@ -19,8 +19,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
-import com.example.nextrep.models.Exercise
-import com.example.nextrep.models.ExercisesRepository
+import com.example.nextrep.models.data.Exercise
+import com.example.nextrep.models.data.ExercisesRepository
 import com.example.nextrep.viewmodels.ExercisesViewModel
 import kotlinx.coroutines.launch
 import java.io.File
