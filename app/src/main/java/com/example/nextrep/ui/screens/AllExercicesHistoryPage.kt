@@ -47,7 +47,7 @@ fun AllExercisesHistoryPage(
         if (uiState.exercises.isEmpty()) {
             Text(
                 text = "Aucun exercice pour l’instant.",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium, // ⬅️ plus gros
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxSize()
@@ -80,19 +80,14 @@ private fun ExerciseHistoryPreviewItem(
     workoutHistoryRepository: WorkoutHistoryRepository,
     onHistoryClick: () -> Unit
 ) {
-    // 🔹 On récupère tous les sets pour cet exercice
     val historyFlow = remember(exercise.id) {
         workoutHistoryRepository
             .getHistoryForExercise(exercise.id)
-            // On groupe par "run" d'entraînement (timestamp commun à un même run)
-            .map { list ->
-                list.groupBy { it.timestamp }
-            }
+            .map { list -> list.groupBy { it.timestamp } }
     }
 
     val groupedByRun by historyFlow.collectAsState(initial = emptyMap<Long, List<WorkoutSetEntity>>())
 
-    // 🔹 On prend le dernier run (timestamp le plus récent)
     val lastRunSets: List<WorkoutSetEntity> = remember(groupedByRun) {
         if (groupedByRun.isEmpty()) {
             emptyList()
@@ -113,16 +108,15 @@ private fun ExerciseHistoryPreviewItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(16.dp) // ⬅️ un peu plus d’air
         ) {
-            // ----- En-tête : nom de l'exercice + bouton flèche -----
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = exercise.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge, // ⬅️ plus gros
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
@@ -135,26 +129,25 @@ private fun ExerciseHistoryPreviewItem(
                 }
             }
 
-            Spacer(modifier = Modifier.padding(top = 4.dp))
+            Spacer(modifier = Modifier.padding(top = 6.dp))
 
-            // ----- Contenu : dernière séance (preview) -----
             if (lastRunSets.isEmpty()) {
                 Text(
                     text = "Aucune donnée encore pour cet exercice.",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium // ⬅️ plus gros
                 )
             } else {
                 Text(
                     text = "Dernière séance :",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium, // ⬅️ plus gros
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    modifier = Modifier.padding(bottom = 6.dp)
                 )
 
                 lastRunSets.forEach { set ->
                     Text(
                         text = "Set ${set.setIndex}: ${set.weightKg} kg x ${set.reps}",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium // ⬅️ plus gros
                     )
                 }
             }

@@ -126,7 +126,7 @@ fun ExerciseListSelectableContent(
         if (exercises.isEmpty()) {
             item {
                 Text(
-                    text = "Aucun exercice. Crée d'abord des exercices.",
+                    text = "No exercises yet. Create an exercise to get started.",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier

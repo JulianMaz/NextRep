@@ -64,7 +64,7 @@ fun SessionListContent(
         if (sessions.isEmpty()) {
             item {
                 Text(
-                    text = "Aucune session pour l’instant.",
+                    text = "You haven’t created any sessions yet.",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
