@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.nextrep.models.data.Exercise
@@ -34,7 +33,6 @@ import kotlinx.coroutines.delay
 // 🔹 Représente l'état d'une ligne de set pour un exercice
 data class SetRowState(
     val index: Int,
-    val previousKg: String = "-",   // 🔹 pour plus tard si tu veux stocker l'historique
     val weightKg: String = "",
     val reps: String = "",
     val isCompleted: Boolean = false
@@ -63,8 +61,6 @@ fun WorkoutLivePage(
     // 🔹 Timer en secondes depuis l'ouverture de la page
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
-    // 🔹 Volume manuel (en kg) saisi par l'utilisateur
-    var manualVolumeKg by remember { mutableStateOf("0") }
 
     // 🔹 Nombre total de sets complétés (toutes les ✓)
     var totalCompletedSets by remember { mutableIntStateOf(0) }
@@ -102,9 +98,9 @@ fun WorkoutLivePage(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // ===== HEADER LIVE (timer + Finish sur une ligne) =====
+        // ===== HEADER LIVE (session name + Finish on a row) =====
         HeaderLiveSection(
-            elapsedSeconds = elapsedSeconds,
+            sessionName = session.name,
             onFinishWorkout = {
                 val completedSets = buildCompletedWorkoutSets(
                     session = session,
@@ -119,8 +115,6 @@ fun WorkoutLivePage(
         // ===== STATS CARD =====
         StatsCard(
             elapsedSeconds = elapsedSeconds,
-            manualVolumeKg = manualVolumeKg,
-            onManualVolumeChange = { manualVolumeKg = it },
             totalCompletedSets = totalCompletedSets
         )
 
@@ -174,28 +168,19 @@ fun WorkoutLivePage(
 
 @Composable
 private fun HeaderLiveSection(
-    elapsedSeconds: Int,
+    sessionName: String,
     onFinishWorkout: () -> Unit
 ) {
-    val formattedTimer = formatDuration(elapsedSeconds)
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Timer
         Text(
-            text = formattedTimer,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center
+            text = sessionName,
+            style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Bouton Finish
         TextButton(
             onClick = onFinishWorkout,
             modifier = Modifier
@@ -216,8 +201,6 @@ private fun HeaderLiveSection(
 @Composable
 private fun StatsCard(
     elapsedSeconds: Int,
-    manualVolumeKg: String,
-    onManualVolumeChange: (String) -> Unit,
     totalCompletedSets: Int
 ) {
     val formattedDuration = formatDuration(elapsedSeconds)
@@ -235,33 +218,21 @@ private fun StatsCard(
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth()
             ) {
-                StatItem(label = "Duration", value = formattedDuration)
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Volume",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    OutlinedTextField(
-                        value = manualVolumeKg,
-                        onValueChange = onManualVolumeChange,
-                        singleLine = true,
-                        modifier = Modifier
-                            .width(80.dp)
-                            .padding(top = 4.dp),
-                        textStyle = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "kg",
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    StatItem(label = "Duration", value = formattedDuration)
                 }
 
-                StatItem(label = "Sets", value = totalCompletedSets.toString())
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    StatItem(label = "Sets", value = totalCompletedSets.toString())
+                }
             }
         }
     }
@@ -275,8 +246,7 @@ private fun StatItem(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.labelMedium
         )
         Text(
             text = value,
@@ -380,11 +350,10 @@ private fun ExerciseLiveBlock(
                     .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("SET", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
-                Text("PREVIOUS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("KG", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("REPS", Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-                Text("Done", Modifier.weight(0.8f), style = MaterialTheme.typography.labelSmall)
+                Text("SET", Modifier.weight(0.9f), style = MaterialTheme.typography.labelSmall)
+                Text("KG", Modifier.weight(1.1f), style = MaterialTheme.typography.labelSmall)
+                Text("REPS", Modifier.weight(1.1f), style = MaterialTheme.typography.labelSmall)
+                Text("Done", Modifier.weight(0.9f), style = MaterialTheme.typography.labelSmall)
             }
 
             Divider(modifier = Modifier.padding(vertical = 4.dp))
@@ -412,7 +381,12 @@ private fun ExerciseLiveBlock(
             TextButton(
                 onClick = {
                     val nextIndex = (sets.maxOfOrNull { it.index } ?: 0) + 1
-                    val newList = sets + SetRowState(index = nextIndex)
+                    val defaultReps = if (exercise.repetitions > 0) exercise.repetitions.toString() else ""
+                    val newList = sets + SetRowState(
+                        index = nextIndex,
+                        weightKg = "10",
+                        reps = defaultReps
+                    )
                     onSetsChanged(newList)
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -440,9 +414,7 @@ private fun SetRow(
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(setRow.index.toString(), Modifier.weight(0.8f))
-
-        Text(setRow.previousKg, Modifier.weight(1f))
+        Text(setRow.index.toString(), Modifier.weight(0.9f))
 
         OutlinedTextField(
             value = setRow.weightKg,
@@ -450,7 +422,7 @@ private fun SetRow(
                 onValueChange(setRow.copy(weightKg = newWeight))
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .padding(horizontal = 4.dp),
             singleLine = true
         )
@@ -461,7 +433,7 @@ private fun SetRow(
                 onValueChange(setRow.copy(reps = newReps))
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .padding(horizontal = 4.dp),
             singleLine = true
         )
@@ -471,7 +443,7 @@ private fun SetRow(
             onCheckedChange = { checked ->
                 onCompletedToggle(setRow.copy(isCompleted = checked))
             },
-            modifier = Modifier.weight(0.8f)
+            modifier = Modifier.weight(0.9f)
         )
     }
 }
@@ -486,7 +458,11 @@ private fun initialSetsForExercise(exercise: Exercise): List<SetRowState> {
     val defaultReps = if (exercise.repetitions > 0) exercise.repetitions.toString() else ""
 
     return (1..count).map { index ->
-        SetRowState(index = index, reps = defaultReps)
+        SetRowState(
+            index = index,
+            weightKg = "10",
+            reps = defaultReps
+        )
     }
 }
 
