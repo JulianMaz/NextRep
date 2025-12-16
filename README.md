@@ -52,7 +52,7 @@ Le projet respecte le patron architectural **MVVM (Model – View – ViewModel)
 ViewModels (gestion de l’état et séparation de la logique métier des exos, sessions et entrainement) :
 - [ExercisesViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/ExercisesViewModel.kt) : rien de spécial
 - [SessionsViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/SessionsViewModel.kt) : rien de spécial
-- [WorkoutViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/WorkoutViewModel.kt) : ce View model à été ajouté apres l'ajout de la fonctionnalité freeWorkout pour qu'on puisse ajouter des exos au fur et à mesure de l'entrainement : [WorkoutView-fonctionAjoutExo](app/src/main/java/com/example/nextrep/viewmodel/WorkoutViewModel.kt#L35).  
+- [WorkoutViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/WorkoutViewModel.kt) : ce View model à été ajouté apres l'ajout de la fonctionnalité freeWorkout pour qu'on puisse ajouter des exos au fur et à mesure de l'entrainement : [WorkoutView-fonctionAjoutExo](app/src/main/java/com/example/nextrep/viewmodels/WorkoutViewModel.kt#L35).  
 
 
 ---
