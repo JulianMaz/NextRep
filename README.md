@@ -1,11 +1,12 @@
 # NextRep
 
-Groupe 6 :
-EL ADHAL Mohamed
-ARAGO Paul
-MAZERAT Julian
+**Groupe 6 :**  
+- EL ADHAL Mohamed  
+- ARAGO Paul  
+- MAZERAT Julian  
 
-Notre Application Android pour créer des exercices, organiser des séances et aussi enregistrer l’historique des entraînements. Le projet a respécté le patron architectural MVVP pour (Model - View - ViewModel) comme vu dans le cours.
+Notre application Android permet de créer des exercices, organiser des séances et enregistrer l’historique des entraînements.  
+Le projet respecte le patron architectural **MVVM (Model – View – ViewModel)** vu dans le cours.
 
 ---
 
@@ -16,72 +17,77 @@ Notre Application Android pour créer des exercices, organiser des séances et a
   - Ajout d’une **photo** via la **caméra**.
   - Affichage de la photo dans la liste des exercices.
 
-- **Gestion des sessions **
+- **Gestion des sessions**
   - Création d’une session et sélection d’exercices existants.
   - Lancement d’un entraînement “Workout Live” basé sur une session.
 
 - **Entraînement**
   - **Workout Live (avec session)** : saisie des sets (kg, reps), ajout de sets, validation (checkbox Done), enregistrement en historique.
-  - **Free Workout (sans session)** : même logique mais sans session mais avec une liste d'exo sélectionné.
+  - **Free Workout (sans session)** : même logique mais sans session, avec une liste d’exercices sélectionnés.
 
 - **Historique**
   - Historique par exercice : affichage des runs (chaque run = une session) + sets associés.
-  - Aperçu “All Exercises History” : preview ==> dernier run par exercice.
+  - Aperçu “All Exercises History” : preview du dernier run par exercice.
 
 ---
 
 ## Structure du projet
 
+### `com.example.nextrep.ui.screens`
+Écrans Compose (pages principales) :
 
-- `com.example.nextrep.ui.screens`
-  - Écrans Compose (pages principales).
-  - Exemples :
-    - `ExercisesListPage.kt` : liste + mode sélection
-    - `ExerciseCreationPage.kt` : création d’un exercice
-    - `WorkoutLivePage.kt` : entraînement d’une session
-    - `FreeWorkoutPage.kt` : entraînement libre
-    - `AllExercicesHistoryPage.kt` : aperçu historique par exercice
-    - `ExerciceHistoryPage.kt` : historique détaillé d’un exercice
+- [ExercisesListPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt)
+- [ExerciseCreationPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciseCreationPage.kt)
+- [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt)
+- [FreeWorkoutPage.kt](app/src/main/java/com/example/nextrep/ui/screens/FreeWorkoutPage.kt)
+- [AllExercicesHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/AllExercicesHistoryPage.kt)
+- [ExerciceHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciceHistoryPage.kt)
 
+---
 
-- `com.example.nextrep.viewmodels`
-  - ViewModels (la partie qui gére la gestion d'etat avec uistate et la separation de la logique) 
-  - Exemples :
-    - `ExercisesViewModel.kt` [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt)
-    - `SessionsViewModel.kt`
+### `com.example.nextrep.viewmodels`
+ViewModels (gestion de l’état et séparation de la logique métier) :
 
-- `com.example.nextrep.models.data`
-  - Repositories + Database 
-  - Exemples :
-    - `ExercisesRepository.kt`
-    - `WorkoutHistoryRepository.kt`
-    - `NextRepDatabase.kt`
+- [ExercisesViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/ExercisesViewModel.kt)
+- [SessionsViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/SessionsViewModel.kt)
 
-- `com.example.nextrep.models.dao`
-  - DAO Room (requêtes SQL)
-  - Exemples :
-    - `ExerciseDao.kt`
-    - `WorkoutSetDao.kt`
+---
 
-- `com.example.nextrep.models.entity`
-  - Entités Room
-  - Exemples :
-    - `ExerciseEntity.kt`
-    - `WorkoutSetEntity.kt`
+### `com.example.nextrep.models.data`
+Repositories et base de données :
 
-- `com.example.nextrep.models.data` (ou `models.kt` / `models` selon ton organisation)
-  - Modèles “UI/domain” utilisés par l’app (`Exercise`, `Session`, etc.)
+- [ExercisesRepository.kt](app/src/main/java/com/example/nextrep/models/data/ExercisesRepository.kt)
+- [WorkoutHistoryRepository.kt](app/src/main/java/com/example/nextrep/models/data/WorkoutHistoryRepository.kt)
+- [NextRepDatabase.kt](app/src/main/java/com/example/nextrep/models/data/NextRepDatabase.kt)
 
+---
 
-## Navigation 
+### `com.example.nextrep.models.dao`
+DAO Room (requêtes SQL) :
+
+- [ExerciseDao.kt](app/src/main/java/com/example/nextrep/models/dao/ExerciseDao.kt)
+- [WorkoutSetDao.kt](app/src/main/java/com/example/nextrep/models/dao/WorkoutSetDao.kt)
+
+---
+
+### `com.example.nextrep.models.entity`
+Entités Room :
+
+- [ExerciseEntity.kt](app/src/main/java/com/example/nextrep/models/entity/ExerciseEntity.kt)
+- [WorkoutSetEntity.kt](app/src/main/java/com/example/nextrep/models/entity/WorkoutSetEntity.kt)
+
+---
+
+## Navigation
 
 Navigation centrale définie dans :
-- `NextRepScreen.kt` (routes / navigation / composables racines)  ← 
+
+- [NextRepScreen.kt](app/src/main/java/com/example/nextrep/NextRepScreen.kt)
 
 Flow typiques :
 - **Créer un exercice** → retour liste
 - **Créer une session** → sélection exercices → sauvegarde → lancement possible en workout
-- **Workout live** → saisie sets → Finish → sauvegarde historique → page de résumé (si existante)
+- **Workout live** → saisie sets → Finish → sauvegarde historique
 
 ---
 
@@ -92,20 +98,26 @@ L’app utilise Room pour stocker :
 - Historique des entraînements (sets effectués)
 
 ### Entités importantes
-- `ExerciseEntity` ← 
-  - Contient (au minimum) : nom, description, séries, répétitions, `photoUri` (ou chemin fichier)
-- `WorkoutSetEntity` ← 
-  - Contient (au minimum) :
-    - `exerciseId`, `exerciseName`
-    - `sessionId`, `sessionName`
-    - `setIndex`, `weightKg`, `reps`
-    - `timestamp` (sert à regrouper un “run”)
+
+- **ExerciseEntity**  
+  → [ExerciseEntity.kt](app/src/main/java/com/example/nextrep/models/entity/ExerciseEntity.kt)  
+  Contient : nom, description, séries, répétitions, `photoUri`.
+
+- **WorkoutSetEntity**  
+  → [WorkoutSetEntity.kt](app/src/main/java/com/example/nextrep/models/entity/WorkoutSetEntity.kt)  
+  Contient :
+  - `exerciseId`, `exerciseName`
+  - `sessionId`, `sessionName`
+  - `setIndex`, `weightKg`, `reps`
+  - `timestamp` (sert à regrouper un run)
 
 ### Repositories
-- `ExercisesRepository` ← 
-  - CRUD exercices
-- `WorkoutHistoryRepository` ← 
-  - Récupération des sets par exercice, tri, groupBy timestamp, etc.
+
+- **ExercisesRepository**  
+  → [ExercisesRepository.kt](app/src/main/java/com/example/nextrep/models/data/ExercisesRepository.kt)
+
+- **WorkoutHistoryRepository**  
+  → [WorkoutHistoryRepository.kt](app/src/main/java/com/example/nextrep/models/data/WorkoutHistoryRepository.kt)
 
 ---
 
