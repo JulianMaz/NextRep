@@ -36,8 +36,10 @@ Le projet respecte le patron architectural **MVVM (Model – View – ViewModel)
 ### `com.example.nextrep.ui.screens`
 Écrans Compose (pages principales) :
 
-- [ExercisesListPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt) : ici l'affichage des liste d'exos
-  à Noter : cette page fonctionne sous 2 modes: 1- mode normal affichage, 2- mode selection (pur ajouter les exos à l'entrainment) cela est géré avec un booléen "selectionMode" [ExercisesListPage.kt – ligne 27](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt#L27).
+- [ExercisesListPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt) : ici l'affichage des liste d'exos.
+- à Noter : cette page fonctionne sous 2 modes:
+ -- 1- mode normal affichage,
+ -- 2- mode selection (pur ajouter les exos à l'entrainment) cela est géré avec un booléen "selectionMode" [ExercisesListPage.kt – ligne 27](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt#L27).
 - [ExerciseCreationPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciseCreationPage.kt) : ici la page responsable à la création des exos (input)
 - [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt) : ici la page principale de notre app où se déroule l'entrainement
 - [FreeWorkoutPage.kt](app/src/main/java/com/example/nextrep/ui/screens/FreeWorkoutPage.kt) : même logique ici sauf qu'on passe pas par la logique de session on lance directement l'enrainement
