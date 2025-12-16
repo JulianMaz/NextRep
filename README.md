@@ -22,11 +22,11 @@ Le projet respecte le patron architectural **MVVM (Model – View – ViewModel)
   - Lancement d’un entraînement “Workout Live” basé sur une session.
 
 - **Entraînement**
-  - **Workout Live (avec session)** : saisie des sets (kg, reps), ajout de sets, validation (checkbox Done), enregistrement en historique.
+  - **Workout Live (avec session)** : saisie des sets, ajout de sets, validation, enregistrement en historique.
   - **Free Workout (sans session)** : même logique mais sans session, avec une liste d’exercices sélectionnés.
 
 - **Historique**
-  - Historique par exercice : affichage des runs (chaque run = une session) + sets associés.
+  - Historique par exercice : affichage des runs (chaque run == > une session) + sets associés.
   - Aperçu “All Exercises History” : preview du dernier run par exercice.
 
 ---
@@ -36,20 +36,22 @@ Le projet respecte le patron architectural **MVVM (Model – View – ViewModel)
 ### `com.example.nextrep.ui.screens`
 Écrans Compose (pages principales) :
 
-- [ExercisesListPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt)
-- [ExerciseCreationPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciseCreationPage.kt)
-- [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt)
-- [FreeWorkoutPage.kt](app/src/main/java/com/example/nextrep/ui/screens/FreeWorkoutPage.kt)
-- [AllExercicesHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/AllExercicesHistoryPage.kt)
-- [ExerciceHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciceHistoryPage.kt)
+- [ExercisesListPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt) : ici l'affichage des liste d'exos
+  à Noter : cette page fonctionne sous 2 modes: 1- mode normal affichage, 2- mode selection (pur ajouter les exos à l'entrainment) cela est géré avec un booléen "selectionMode" [ExercisesListPage.kt – ligne 27](app/src/main/java/com/example/nextrep/ui/screens/ExercisesListPage.kt#L27).
+- [ExerciseCreationPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciseCreationPage.kt) : ici la page responsable à la création des exos (input)
+- [WorkoutLivePage.kt](app/src/main/java/com/example/nextrep/ui/screens/WorkoutLivePage.kt) : ici la page principale de notre app où se déroule l'entrainement
+- [FreeWorkoutPage.kt](app/src/main/java/com/example/nextrep/ui/screens/FreeWorkoutPage.kt) : même logique ici sauf qu'on passe pas par la logique de session on lance directement l'enrainement
+- [AllExercicesHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/AllExercicesHistoryPage.kt) : ici l'affichage d'une preview de tt les historiques des exos
+- [ExerciceHistoryPage.kt](app/src/main/java/com/example/nextrep/ui/screens/ExerciceHistoryPage.kt): : ici l'affichage en détail de l'historique d'un exo en particulier 
 
 ---
 
 ### `com.example.nextrep.viewmodels`
-ViewModels (gestion de l’état et séparation de la logique métier) :
-
-- [ExercisesViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/ExercisesViewModel.kt)
+ViewModels (gestion de l’état et séparation de la logique métier des exos, sessions et entrainement) :
+- [ExercisesViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/ExercisesViewModel.kt) : rien de spécial
 - [SessionsViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/SessionsViewModel.kt)
+- [WorkoutViewModel.kt](app/src/main/java/com/example/nextrep/viewmodels/WorkoutViewModel.kt)
+
 
 ---
 
@@ -109,7 +111,7 @@ L’app utilise Room pour stocker :
   - `exerciseId`, `exerciseName`
   - `sessionId`, `sessionName`
   - `setIndex`, `weightKg`, `reps`
-  - `timestamp` (sert à regrouper un run)
+  - `timestamp` (sert à regrouper et identifier un run (un entrainment))
 
 ### Repositories
 
@@ -131,12 +133,12 @@ Sur les pages d’entraînement, les champs (`OutlinedTextField`) peuvent perdre
   - `exerciseSets: Map<exerciseId, List<RowState>>`
 - Chaque ligne/set est “stateless” et pilotée par la valeur du state parent.
 
-Fichiers à regarder :
+Fichiers à regarder !! :
 - `FreeWorkoutPage.kt` ← 
 - `WorkoutLivePage.kt` ← 
 
 ### 2) Caméra : FileProvider / URI & crash FileUriExposedException
-Si tu passes une `file://...` URI à la caméra, Android peut crasher (`FileUriExposedException`).
+Si on passe `file://...` URI à la caméra, Android peut crasher (`FileUriExposedException`).
 
 **Approche recommandée :**
 - Utiliser `FileProvider` + `content://...` URI
